@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+{% load static %}
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+<title>Preskool - Hostel</title>
+
+<link rel="shortcut icon" href="{% static 'assets/img/favicon.png' %}">
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;0,900;1,400;1,500;1,700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="{% static 'assets/plugins/bootstrap/css/bootstrap.min.css' %}">
+
+<link rel="stylesheet" href="{% static 'assets/plugins/feather/feather.css' %}">
+
+<link rel="stylesheet" href="{% static 'assets/plugins/icons/flags/flags.css' %}">
+
+<link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/fontawesome.min.css' %}">
+<link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/all.min.css' %}">
+
+<link rel="stylesheet" href="{% static 'assets/plugins/select2/css/select2.min.css' %}">
+
+<link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+
+<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+<head>
+  <!-- Autocomplete.js -->
+  <script src="https://unpkg.com/@trevoreyre/autocomplete-js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@trevoreyre/autocomplete-js/dist/style.css">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+
+</head>
+<body>
+
+<div class="main-wrapper">
+
+<div class="header">
+
+<div class="header-left">
+<a href="index.html" class="">
+<img src="{% static 'assets/img/logo.png' %}" alt="Logo">
+</a>
+
+</div>
+
+<div class="menu-toggle">
+<a href="javascript:void(0);" id="toggle_btn">
+<i class="fas fa-bars"></i>
+</a>
+</div>
+
+
+
+
+<a class="mobile_btn" id="mobile_btn">
+<i class="fas fa-bars"></i>
+</a>
+
+
+<ul class="nav user-menu">
+<li class="nav-item dropdown language-drop me-2">
+<a href="#" class="dropdown-toggle nav-link header-nav-list" data-bs-toggle="dropdown">
+<img src="{% static 'assets/img/france.png' %}" alt="">
+</a>
+<div class="dropdown-menu">
+
+<a class="dropdown-item" href="javascript:;"><i class="flag flag-bl me-2"></i>Francais</a>
+
+</div>
+</li>
+
+
+
+<li class="nav-item zoom-screen me-2">
+<a href="#" class="nav-link header-nav-list">
+<img src="{% static 'assets/img/icons/header-icon-04.svg' %}" alt="">
+</a>
+</li>
+
+<li class="nav-item dropdown has-arrow new-user-menus">
+<a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
+<span class="user-img">
+<img class="rounded-circle" src="{% static 'assets/img/profiles/avatar-01.jpg' %}" width="31" alt="Soeng Souy">
+<div class="user-text">
+<h6>Mohamed abdelahi</h6>
+<p class="text-muted mb-0"></p>
+</div>
+</span>
+</a>
+<div class="dropdown-menu">
+
+
+<a class="dropdown-item" href="inbox.html">changer mot de passe</a>
+<a class="dropdown-item" href="login.html">Logout</a>
+</div>
+</li>
+
+</ul>
+
+</div>
+
+
+<div class="sidebar" id="sidebar">
+<div class="sidebar-inner slimscroll">
+<div id="sidebar-menu" class="sidebar-menu">
+<ul>
+<li class="menu-title">
+<span>Main Menu</span>
+</li>
+<li class="submenu">
+<a href="#"><i class="feather-grid"></i> <span> Tableau de bord</span> <span class="menu-arrow"></span></a>
+ <ul>
+<li><a href="index.html">Liste des responsable</a></li>
+<li><a href="teacher-dashboard.html">Ajouter des responsable</a></li>
+</ul>
+</li>
+
+<li class="submenu">
+<a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Professeurs</span> <span class="menu-arrow"></span></a>
+<ul>
+<li><a href="/Listeprof">Liste des Professeurs</a></li>
+<li><a href="/addp">Ajouter des Professeurs</a></li>
+</ul>
+</li>
+<li class="submenu">
+<a href="#"><i class="fas fa-building"></i> <span> Salles</span> <span class="menu-arrow"></span></a>
+<ul>
+    <li><a href="/salle">Liste des Salles</a></li>
+    <li><a href="/add">Ajouter des Salles</a></li>
+</ul>
+</li>
+<li class="submenu">
+<a href="#"><i class="fas fa-book-reader"></i> <span> Profile</span> <span class="menu-arrow"></span></a>
+<ul>
+    <li><a href="/filiere">Liste des Profile</a></li>
+    <li><a href="/addFil">Ajouter des Profile</a></li>
+</ul>
+</li>
+
+<li class="menu-title">
+<span>Emplois</span>
+</li>
+<li class="submenu">
+  <a href="#"><i class="fas fa-calendar-alt"></i> <span> Emplois</span> <span class="menu-arrow"></span></a>
+  <ul>
+      <li>
+          <a href="/ListeEmplois"> <span>Liste des Emplois</span></a>
+          </li>
+        
+  
+  </ul>
+  </li>
+
+
+
+<span>SUIVI</span>
+</li>
+<li>
+<a href="sports.html"><i class="fas fa-baseball-ball"></i> <span>Sports</span></a>
+</li>
+<li>
+<a href="transport.html"><i class="fas fa-bus"></i> <span>Transport</span></a>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+
+<div class="page-wrapper">
+    <div class="content container-fluid">
+    
+    <div class="page-header">
+    <div class="row align-items-center">
+    <div class="col">
+    <h3 class="page-title">Add Teachers</h3>
+    <ul class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/Listeprof">Retour au liste</a></li>
+
+    </ul>
+    </div>
+    </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="card">
+          <div class="card-body">
+            {% if form.errors %}
+            <div class="error-message">
+              {% for field_name, field_errors in form.errors.items %}
+                {% for error in field_errors %}
+                  <p style="color:red">{{error}}</p>
+                {% endfor %}
+              {% endfor %}
+            </div>
+          {% endif %}
+         
+            <form method="post" class="form-inline">
+              {% csrf_token %}
+            
+              <div class="form-group mr-sm-2">
+                <label for="{{ form.id.id_for_label }}"><span class="login-danger">*</span>ID</label>
+                {{ form.id }}
+              </div>
+            
+              <div class="form-group mr-sm-2">
+                <label for="{{ form.Mat.id_for_label }}"><span class="login-danger">*</span>Matieres</label>
+                {{ form.Mat}}
+              </div>
+              <div class="form-group mr-sm-2">
+                <label for="{{ form.NumJour.id_for_label }}"><span class="login-danger">*</span>Jour</label>
+                {{ form.NumJour}}
+              </div>
+              <div class="form-group mr-sm-2">
+                <label for="{{ form.Cd_Horaire.id_for_label }}"><span class="login-danger">*</span>Horaire</label>
+                {{ form.Cd_Horaire }}
+              </div>
+              <div class="form-group mr-sm-2">
+                <label for="{{ form.salle.id_for_label }}"><span class="login-danger">*</span>Salle</label>
+                {{ form.salle }}
+               
+              </div>
+              
+         
+
+              <div class="form-group mr-sm-2">
+                <label for="{{ form.Matricule.id_for_label }}"><span class="login-danger">*</span>Professeurs</label>
+                {{ form.Matricule }}
+              </div>
+              <div class="form-group mr-sm-2">
+                <label for="{{ form.NatCours.id_for_label }}"><span class="login-danger">*</span>NatureCours</label>
+                {{ form.NatCours}}
+              </div>
+            
+              <button type="submit" class="btn btn-primary">Ajouter</button>
+    
+        </div>
+        </div>
+       </form>
+    
+    </div>
+    </div>
+  </div>
+  </div>
+<script>
+  $(document).ready(function() {
+    // Récupérer les références des éléments de sélection
+    var salleSelect = $('#id_salle');
+    var professeurSelect = $('#id_Matricule');
+
+
+    // Copier les options initiales pour une réinitialisation
+    var initialSalleOptions = salleSelect.html();
+    var initialProfesseurOptions = professeurSelect.html();
+
+    // Fonction de mise à jour des options de sélection en fonction des sélections de l'utilisateur
+    function updateSelectionOptions() {
+  var selectedHoraire = $('#id_Cd_Horaire').val();
+  var selectedJour = $('#id_NumJour').val();
+
+  // Réinitialiser les options de sélection
+  salleSelect.html(initialSalleOptions);
+  professeurSelect.html(initialProfesseurOptions);
+
+  // Effectuer une requête AJAX pour obtenir les données d'occupation
+  $.ajax({
+    url: '/api/occupancy/',
+    data: {
+      horaire: selectedHoraire,
+      jour: selectedJour,
+    },
+    dataType: 'json',
+    success: function(data) {
+      // Filtrer les options en fonction des données d'occupation
+      salleSelect.find('option').each(function() {
+        var salleId = $(this).val();
+        var isOccupied = data.occupied_salles.includes(salleId);
+
+        if (isOccupied) {
+          $(this).remove();
+        }
+      });
+
+      professeurSelect.find('option').each(function() {
+        var professeurId = $(this).val();
+        var isOccupied = data.occupied_professeurs.includes(professeurId);
+
+        if (isOccupied) {
+          $(this).remove();
+        }
+      });
+    },
+    error: function() {
+      // Gérer les erreurs de requête AJAX
+    }
+  });
+}
+
+
+    // Appeler la fonction de mise à jour lorsqu'une sélection change
+    $('#id_Cd_Horaire, #id_NumJour').on('change', updateSelectionOptions);
+  });
+  
+  
+  $(document).ready(function() {
+    new Autocomplete('#autocomplete', {
+      search: input => {
+        const url = `/get_salles/?search=${input}`;
+        return new Promise(resolve => {
+          fetch(url)
+            .then(response => response.json())
+            .then(data => {
+              resolve(data.payload);
+            });
+        });
+        $('#autocomplete').on('click', '.wiki-title', function() {
+  var salleId = $(this).data('id');
+  var salleNom = $(this).text();
+
+  $('input[name="salle"]').val(salleId); // Définir la valeur de l'ID de la salle dans le champ caché
+  $('input[name="salle"]').siblings('.autocomplete-result-list').empty(); // Vider la liste de résultats de l'autocomplétion
+  $('input[name="salle"]').siblings('.autocomplete-result-list').hide(); // Masquer la liste de résultats de l'autocomplétion
+  $('input[name="salle"]').val(salleNom); // Afficher le nom de la salle dans le champ visible
+}); },
+      // Gérer la sélection d'une salle dans l'autocomplétion
+
+
+       renderResult(result, props) {
+  return `
+    <li ${props}>
+      <div class="wiki-title" data-id="${result.salle.id}">
+        ${result.salle}
+      </div>
+    </li>
+  `;
+}
+
+    });
+  });
+</script>
+
+
+  
+
+<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+
+<script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+<script src="{% static 'assets/js/feather.min.js' %}"></script>
+
+<script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+
+<script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
+
+<script src="{% static 'assets/js/script.js' %}"></script>
+</body>
+</html>
+
+
+
+

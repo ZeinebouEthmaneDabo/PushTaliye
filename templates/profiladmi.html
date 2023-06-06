@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+{% load static %}
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+<title>ISCAEMP - ISCAE</title>
+
+<link rel="shortcut icon" href="{% static 'assets/img/favicon.png' %}">
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;0,900;1,400;1,500;1,700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="{% static 'assets/plugins/bootstrap/css/bootstrap.min.css' %}">
+
+<link rel="stylesheet" href="{% static 'assets/plugins/feather/feather.css' %}">
+
+<link rel="stylesheet" href="{% static 'assets/plugins/icons/flags/flags.css' %}">
+
+<link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/fontawesome.min.css' %}">
+<link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/all.min.css' %}">
+
+<link rel="stylesheet" href="{% static 'assets/plugins/select2/css/select2.min.css' %}">
+
+<link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+
+ 
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+
+<!-- Fichier JavaScript -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+</head>
+<body>
+
+<div class="main-wrapper">
+
+<div class="header">
+
+<div class="header-left">
+<a href="index.html" class="">
+<img src="{% static 'assets/img/logo.png' %}" alt="Logo">
+</a>
+
+</div>
+
+<div class="menu-toggle">
+<a href="javascript:void(0);" id="toggle_btn">
+<i class="fas fa-bars"></i>
+</a>
+</div>
+
+
+
+
+<a class="mobile_btn" id="mobile_btn">
+<i class="fas fa-bars"></i>
+</a>
+
+
+<ul class="nav user-menu">
+<li class="nav-item dropdown language-drop me-2">
+<a href="#" class="dropdown-toggle nav-link header-nav-list" data-bs-toggle="dropdown">
+<img src="{% static 'assets/img/france.png' %}" alt="">
+</a>
+<div class="dropdown-menu">
+
+<a class="dropdown-item" href="javascript:;"><i class="flag flag-bl me-2"></i>Francais</a>
+
+</div>
+</li>
+
+
+
+<li class="nav-item zoom-screen me-2">
+<a href="#" class="nav-link header-nav-list">
+<img src="{% static 'assets/img/header-icon-04.svg' %}" alt="">
+</a>
+</li>
+
+<li class="nav-item dropdown has-arrow new-user-menus">
+<a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
+<span class="user-img">
+<img class="rounded-circle" src="{% static 'assets/img/admin.jpg' %}" width="31" >
+<div class="user-text">
+    <h6>{{ user.username }}</h6>
+    <p class="text-muted mb-0"></p>
+    </div>
+    </span>
+    </a> 
+    <div class="dropdown-menu">
+    
+    
+    <a class="dropdown-item" href="/profiladmi">profil</a>
+    
+    <a class="dropdown-item" href="/signout">Logout</a>
+</div>
+</li>
+
+</ul>
+
+</div>
+
+
+<div class="sidebar" id="sidebar">
+<div class="sidebar-inner slimscroll">
+<div id="sidebar-menu" class="sidebar-menu">
+<ul>
+<li class="menu-title">
+<span> Menu</span>
+</li>
+<li class="">
+    <a href="/index"><i class="feather-home"></i> <span> Acceuil</span> <span class=""></span></a>
+    </li>
+<li class="submenu">
+<a href="#"><i class="feather-grid"></i> <span> Tableau de bord</span> <span class="menu-arrow"></span></a>
+ <ul>
+<li><a href="/listrespo">Liste des responsable</a></li>
+<li><a href="/singup">Ajouter des responsable</a></li>
+</ul>
+</li>
+
+<li class="submenu">
+<a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Professeurs</span> <span class="menu-arrow"></span></a>
+<ul>
+    <li><a href="/Listeprof">Liste des Professeurs</a></li>
+    <li><a href="/addp">Ajouter des Professeurs</a></li>
+</ul>
+</li>
+<li class="submenu">
+<a href="#"><i class="fas fa-building"></i> <span> Salles</span> <span class="menu-arrow"></span></a>
+<ul>
+<li><a href="/salle">Liste des Salles</a></li>
+<li><a href="/add">Ajouter des Salles</a></li>
+</ul>
+</li>
+<li class="submenu">
+<a href="#"><i class="fas fa-book-reader"></i> <span> Profile</span> <span class="menu-arrow"></span></a>
+<ul>
+    <li><a href="/filiere">Liste des Profile</a></li>
+    <li><a href="/addFil">Ajouter des Profile</a></li>
+</ul>
+</li>
+
+<li class="menu-title">   
+<span>Emplois</span>           
+</li>
+<li class="submenu">
+    <a href="#"><i class="fas fa-calendar-alt"></i> <span> Emplois</span> <span class="menu-arrow"></span></a>
+    <ul>
+        <li>
+            <a href="/ListeEmplois"> <span>Liste des Emplois</span></a>
+            </li>
+          
+    
+    </ul>
+    </li>
+
+<li class="menu-title">
+    <span>Suivi</span>
+    </li>
+</li>
+
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+
+<div class="page-wrapper">
+    <div class="content container-fluid">
+    
+    <div class="page-header">
+    <div class="row">
+    <div class="col">
+    <h3 class="page-title">Profile</h3>
+    </div>
+    </div>
+    </div>
+    
+    <div class="row">
+    <div class="col-md-12">
+    <div class="profile-header">
+    <div class="row align-items-center">
+    <div class="col-auto profile-image">
+    <a href="#">
+    <img class="rounded-circle" alt="User Image" src="{% static 'assets/img/admin.jpg' %}">
+    </a>
+    </div>
+    <div class="col ms-md-n2 profile-user-info">
+    <h3 class="user-name mb-0">{{ user.username }}</h3>
+    
+    </div>
+    
+    </div>
+    </div>
+    <div class="profile-menu">
+    <ul class="nav nav-tabs nav-tabs-solid">
+    <li class="nav-item">
+    <h4 class="nav-link" >changer mot de passe</h4>
+    </li>
+    </ul>
+    </div>
+   
+<!-- password_tab.html -->
+<div id="" class="">
+    <div class="card">
+        <div class="card-body">
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                        {% if 'Your old password was entered incorrectly. Please enter it again.' in message %}
+                            <div class="alert alert-danger">Votre ancien mot de passe a été saisi incorrectement. Veuillez le saisir à nouveau.</div>
+                        {% elif 'The two password fields didn&#x27;t match.' in message %}
+                            <div class="alert alert-danger">Les deux champs de mot de passe ne correspondent pas.</div>
+                        {% elif 'This password is too short. It must contain at least 8 characters.' in message %}
+                            <div class="alert alert-danger">Ce mot de passe est trop court. Il doit contenir au moins 8 caractères.</div>
+                        {% elif 'This password is too common.' in message %}
+                            <div class="alert alert-danger">Ce mot de passe est trop courant.</div>
+                        {% elif 'The password is entirely numeric.' in message %}
+                            <div class="alert alert-danger">Le mot de passe est entièrement numérique.</div>
+                        {% else %}
+                            <div class="alert alert-danger">{{ message }}</div>
+                        {% endif %}
+                    {% elif message.tags == 'success' %}
+                        {% if 'Votre mot de passe a été modifié avec succès.' in message %}
+                            <div class="alert alert-success">Votre mot de passe a été modifié avec succès.</div>
+                        {% else %}
+                            <div class="alert alert-success">{{ message }}</div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            <div class="row">
+                <div class="col-md-10 col-lg-6">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="form-group">
+                                <label for="{{ field.id_for_label }}">
+                                    {% if field.name == "old_password" %}
+                                        Ancien mot de passe
+                                    {% elif field.name == "new_password1" %}
+                                        Nouveau mot de passe
+                                    {% elif field.name == "new_password2" %}
+                                        Confirmer le nouveau mot de passe
+                                    {% else %}
+                                        {{ field.label }}
+                                    {% endif %}
+                                </label>
+                                <input type="{{ field.field.widget.input_type }}"
+                                       class="form-control{% if field.errors %} is-invalid{% endif %}"
+                                       id="{{ field.id_for_label }}"
+                                       name="{{ field.html_name }}">
+                                {% if field.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in field.errors %}
+                                            {% if 'Your old password was entered incorrectly. Please enter it again.' in error %}
+                                                Votre ancien mot de passe a été saisi incorrectement. Veuillez le saisir à nouveau.
+                                            {% elif 'The two password fields didn&#x27;t match.' in error %}
+                                                Les deux champs de mot de passe ne correspondent pas.
+                                            {% elif 'This password is too short. It must contain at least 8 characters.' in error %}
+                                                Ce mot de passe est trop court. Il doit contenir au moins 8 caractères.
+                                            {% elif 'This password is too common.' in error %}
+                                                Ce mot de passe est trop courant.
+                                            {% elif 'The password is entirely numeric.' in error %}
+                                                Le mot de passe est entièrement numérique.
+                                            {% elif 'This field is required.' in error %}
+                                                Ce champ est obligatoire.
+                                            {% elif 'The two password fields didn’t match.' in error %}
+                                                Les deux champs de mot de passe ne correspondent pas.
+                                            {% else %}
+                                                {{ error }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        <button class="btn btn-primary" type="submit">Confirmez le mot de passe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    
+    </div>
+
+
+
+
+    <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+   
+   <script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+   
+   <script src="{% static 'assets/js/feather.min.js' %}"></script>
+   
+   <script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+   
+   <script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
+   
+   <script src="{% static 'assets/js/script.js' %}"></script>
+
+   
+
+
+</body>
+</html>
