@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 
 {% load static %}
@@ -25,7 +27,13 @@
 
 <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
 
+ 
 
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+
+<!-- Fichier JavaScript -->
 
 
 </head>
@@ -184,69 +192,148 @@
     
 
 
+
+
+
 <div class="page-wrapper">
-<div class="content container-fluid">
+    <div class="content container-fluid">
+    
+    <div class="page-header">
+    <div class="row align-items-center">
+    <div class="col">
+    <h3 class="page-title">matières</h3>
+    <ul class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/salle">matières</a></li>
+    <li class="breadcrumb-item active">Liste des matières</li>
+    </ul>
+    </div>
+    </div>
+    </div>
+  <form>
+    <div class="student-group-form">
+    <div class="row">
+    <div class="col-lg-3 col-md-6">
+    <div class="form-group">
+    <input type="text" name="q" class="form-control" placeholder=" ">
+    </div>
+    </div>
+    
 
-<div class="page-header">
-<div class="row align-items-center">
-<div class="col">
-<h3 class="page-title"></h3>
-<ul class="breadcrumb">
-<li class="breadcrumb-item active"><a href="/filiere">Retour au Liste</a></li>
-</ul>
-</div>
-</div>
-</div>
+    <div class="col-lg-2">
+    <div class="search-student-btn">
+    <button type="submit" class="btn btn-primary">Rechercher</button>
+    </div>
+    </div>
+    </div>
+    </div>
+  </form>
+    <div class="row">
+    <div class="col-sm-12">
+    <div class="card card-table">
+    <div class="card-body">
 
-<div class="row">
-<div class="col-sm-12">
-<div class="card">
-<div class="card-body">
+    
+    <div class="page-header">
+    <div class="row align-items-center">
+    <div class="col">
+    
+    </div>
+    <div class="col-auto text-end float-end ms-auto download-grp">
+    <a href="#" class="btn btn-outline-primary me-2"><i class="fas fa-download"></i> Download</a>
   
+    </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table border-0 star-student table-hover table-center mb-0 datatable table-striped">
+            <thead>
+                <tr>
+                    <th rowspan="2">CodeEM</th>
+                    <th colspan="5">Planification</th>
+                    <th colspan="4">Realisation</th>
+                    <th colspan="4">% Avancement</th>
+                </tr>
+                <tr>
+                    <th>CM</th>
+                    <th>TD</th>
+                    <th>TP</th>
+                    <th>Projet</th>
+                    <th>Semestre</th>
+                    <th>CM</th>
+                    <th>TD</th>
+                    <th>TP</th>
+                    <th>Projet</th>
+                    <th>CM</th>
+                    <th>TD</th>
+                    <th>TP</th>
+                    <th>Projet</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for matiere in Matieres %}
+                    <tr>
+                        <td>{{ matiere.Nummat }}</td>
+                        <td>{{ matiere.CM }}</td>
+                        <td>{{ matiere.TD }}</td>
+                        <td>{{ matiere.TP }}</td>
+                        <td>{{ matiere.PR }}</td>
+                        <td>{{ matiere.Sem.NSem }}</td>
+                        <td>{{ matiere.realisation.CM }}</td>
+                        <td>{{ matiere.realisation.TD }}</td>
+                        <td>{{ matiere.realisation.TP }}</td>
+                        <td>{{ matiere.realisation.PR }}</td>
+                        <td class="{% if matiere.avancement.CM >= 100 %}bg-success{% elif matiere.avancement.CM > 100 %}bg-danger{% endif %}">{{ matiere.avancement.CM }}%</td>
+                        <td class="{% if matiere.avancement.TD >= 100 %}bg-success{% elif matiere.avancement.TD > 100 %}bg-danger{% endif %}">{{ matiere.avancement.TD }}%</td>
+                        <td class="{% if matiere.avancement.TP >= 100 %}bg-success{% elif matiere.avancement.TP > 100 %}bg-danger{% endif %}">{{ matiere.avancement.TP }}%</td>
+                        <td class="{% if matiere.avancement.PR >= 100 %}bg-success{% elif matiere.avancement.PR > 100 %}bg-danger{% endif %}">{{ matiere.avancement.PR }}%</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    
+    
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
 
-{% block content %}
+   <script>
+    $(document).ready(function() {
+        // Changer la couleur des cases selon l'avancement
+        $('.datatable tbody td').each(function() {
+            var avancement = parseInt($(this).text().replace('%', ''));
+            if (avancement === 100) {
+                $(this).addClass('bg-success');
+            } else if (avancement > 100) {
+                $(this).addClass('bg-danger');
+            }
+        });
+    });
+</script>
 
-<form method="post" action="{% url 'updatemat' matieres.Nummat %}">
-    {% csrf_token %}
-    <h1>{{ matieres.Nummat }}</h1>
-    <table class="table table-bordered">
-        <tr>
-            <th>Libelle de Filiere </th>
-            <td>
-                <input value="{{ matieres.Mat }}" type="text" name="mat" class="form-control" />
-            </td>
-        </tr>
-       
-        
-            <td colspan="2">
-                <button type="submit" class="btn btn-primary">Modifier</button>
-            
-            </td>
-        </tr>
-    </table>
-</form>
-{% endblock %}
-
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-
-</div>
+    
+    
+    
 
 
-<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
 
-<script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
 
-<script src="{% static 'assets/js/feather.min.js' %}"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+   
+   <script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+   
+   <script src="{% static 'assets/js/feather.min.js' %}"></script>
+   
+   <script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+   
+   <script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
+   
+   <script src="{% static 'assets/js/script.js' %}"></script>
 
-<script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
 
-<script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
-
-<script src="{% static 'assets/js/script.js' %}"></script>
 </body>
 </html>

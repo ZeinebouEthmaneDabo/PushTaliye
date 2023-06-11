@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 {% load static %}
@@ -24,8 +25,14 @@
 <link rel="stylesheet" href="{% static 'assets/plugins/select2/css/select2.min.css' %}">
 
 <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+ 
 
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
 
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+
+<!-- Fichier JavaScript -->
 
 
 </head>
@@ -184,69 +191,140 @@
     
 
 
+
+
+
 <div class="page-wrapper">
-<div class="content container-fluid">
+    <div class="content container-fluid">
+    
+    <div class="page-header">
+    <div class="row align-items-center">
+    <div class="col">
+    
+    </div>
+    </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-sm-12"> 
+            <div class="card card-table">
+                <div class="card-body">
+                    <h2>Liste des Cours pour la semaine {{ semaine }} :</h2>
 
-<div class="page-header">
-<div class="row align-items-center">
-<div class="col">
-<h3 class="page-title"></h3>
-<ul class="breadcrumb">
-<li class="breadcrumb-item active"><a href="/filiere">Retour au Liste</a></li>
-</ul>
-</div>
-</div>
-</div>
-
-<div class="row">
-<div class="col-sm-12">
-<div class="card">
-<div class="card-body">
-  
-
-{% block content %}
-
-<form method="post" action="{% url 'updatemat' matieres.Nummat %}">
-    {% csrf_token %}
-    <h1>{{ matieres.Nummat }}</h1>
-    <table class="table table-bordered">
-        <tr>
-            <th>Libelle de Filiere </th>
-            <td>
-                <input value="{{ matieres.Mat }}" type="text" name="mat" class="form-control" />
-            </td>
-        </tr>
+                    <div class="table-responsive">
+                       
+                        <table class="table border-0 star-student table-hover table-center mb-0 datatable table-striped" >
+  <thead>
+    <tr>
+      <th>Matricule</th>
+      <th>Téléphone</th>
+      <th>NOPRFL</th>
+      <th>Mat</th>
+      <th>Cd_Horaire</th>
+      <th>Salle</th>
+      <th>CDDateJour</th>
+      <th>Vl</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for cours in cours %}
+      <tr>
+        <td>{{ cours.matricule.Nom }}</td>
+        <td>{{ cours.matricule.Telephone }}</td>
+        <td>{{ cours.noprfl.LibelleProfil }}</td>
+        <td>{{ cours.mat.Mat }}</td>
+        <td>{{ cours.cd_horaire.HCours }}</td>
+        <td>{{ cours.salle.NomSalles }}</td>
+        <td>{{ cours.CDDateJour.DateJour }}</td>
        
+      <td>
+
+   <select class="form-control" name="vl" id="vl-{{ cours.ID }}">
+   <option value="True" {% if cours.vl %}selected{% endif %}>Fait</option>
+          <option value="False" {% if not cours.vl %}selected{% endif %}>Non fait</option>
+           </select>
+                                      
+ </td>
+</tr>
+     {% endfor %}
+            </tbody>
+        </table>
+         </div>
+         <br>
+         <button id="btn-enregistrer" class="btn btn-outline-primary me-2">Enregistrer</button>
+         </div>
         
-            <td colspan="2">
-                <button type="submit" class="btn btn-primary">Modifier</button>
+    
+<script>
+$(document).ready(function() {
+    $('#btn-enregistrer').click(function() {
+        var coursData = [];
+        
+        // Parcourir tous les éléments de la liste déroulante
+        $('select[name="vl"]').each(function() {
+            var coursId = $(this).attr('id').split('-')[1];
+            var vlValue = $(this).val();
             
-            </td>
-        </tr>
-    </table>
-</form>
-{% endblock %}
+            coursData.push({id: coursId, vl: vlValue});
+        });
+        
+        // Obtenir le jeton CSRF
+        var csrftoken = getCookie('csrftoken');
+        
+        // Envoi des données via une requête AJAX
+        $.ajax({
+            url: '/enregistrer_cours/',
+            type: 'POST',
+            data: {coursData: JSON.stringify(coursData)},
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);  // Ajouter le jeton CSRF à l'en-tête de la requête
+            },
+            success: function(response) {
+                alert('Les cours ont été enregistrés avec succès !');
+                // Redirige vers une autre page ou effectue d'autres actions
+            },
+            error: function(xhr, status, error) {
+                console.log(error);
+                alert('Une erreur s\'est produite lors de l\'enregistrement des cours.');
+            }
+        });
+    });
+});
 
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
+// Fonction pour récupérer la valeur du cookie CSRF
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
 
-</div>
+                    
+                    
+
+    <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+   
+   <script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+   
+   <script src="{% static 'assets/js/feather.min.js' %}"></script>
+   
+   <script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+   
+   <script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
+   
+   <script src="{% static 'assets/js/script.js' %}"></script>
 
 
-<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
-
-<script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-
-<script src="{% static 'assets/js/feather.min.js' %}"></script>
-
-<script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
-
-<script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
-
-<script src="{% static 'assets/js/script.js' %}"></script>
 </body>
 </html>

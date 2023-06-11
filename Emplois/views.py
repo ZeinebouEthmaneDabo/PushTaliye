@@ -1,10 +1,12 @@
 from cProfile import Profile
 from datetime import date
+import datetime
 from pdb import Pdb
 import zipfile
+from django import forms
 
 from django.urls import reverse
-from . models import DEPART, Matieres, Profil, Salles, Professeurs, EmploisCours, Horaire, Jours, Semestre,AnneeEnCours
+from . models import DEPART, Matieres, Profil, Salles, Professeurs, EmploisCours, Horaire, Jours, Semestre,AnneeEnCours,Semaine,DateJour
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -188,14 +190,25 @@ def salle_list_pdf(request):
 
 @login_required
 @cache_control(no_cache=True, must_revalidate=True,no_store=True)
+
+
 def home(request):
-    if 'q' in request.GET:
-        q = request.GET['q']
-        multiple_q = Q(Q(NomSalles__icontains=q) | Q(CapSal__icontains=q) | Q(Niv__icontains=q))
-        salles = Salles.objects.filter(multiple_q)
-    else:   
-      salles = Salles.objects.all()
-    return render(request, 'salle.html', {'salles': salles})
+    nom_salles = request.GET.get('nom_salles', '')
+    cap_sal = request.GET.get('cap_sal', '')
+    niv = request.GET.get('niv', '')
+
+    queryset = Salles.objects.all()
+
+    if nom_salles:
+        queryset = queryset.filter(NomSalles__icontains=nom_salles)
+    if cap_sal:
+        queryset = queryset.filter(CapSal__icontains=cap_sal)
+    if niv:
+        queryset = queryset.filter(Niv__icontains=niv)
+
+    return render(request, 'salle.html', {'salles': queryset})
+
+
 
 # functions du filiere
 # Ajout du Salle
@@ -389,17 +402,34 @@ def addM(request, filiere_id):
     semestres = Semestre.objects.filter(Niv=niveau)  # Filtrer les semestres par le niveau de la filière
 
     if request.method == "POST":
+        Nummat=request.POST.get("Num")
         mat = request.POST.get("mat")
         semestre_id = request.POST.get("sem")
+        cm = int(request.POST.get("cm"))
+        td = int(request.POST.get("td"))
+        tp = int(request.POST.get("tp"))
+        pr = int(request.POST.get("pr"))
+
         try:
             Sem = semestres.get(NSem=semestre_id)  # Récupérer le semestre correspondant à l'ID sélectionné
-            Matieres.objects.create(Mat=mat, Noprfl=profile, Sem=Sem)
+            Matieres.objects.create(
+                Nummat=Nummat,
+                Mat=mat,
+                Noprfl=profile,
+                Sem=Sem,
+                CM=cm,
+                TD=td,
+                TP=tp,
+                PR=pr
+            )
             messages.success(request, "Matière ajoutée avec succès.", extra_tags='success')
         except IntegrityError as e:
             messages.error(request, "Duplication détectée.", extra_tags='danger')
+
         return redirect("addM", filiere_id=filiere_id)
 
     return render(request, "addmatiers.html", {"profil": profile, "semestres": semestres})
+
 
 
 
@@ -453,22 +483,31 @@ def updateprof(request, matricule):
 
 @login_required
 @cache_control(no_cache=True, must_revalidate=True,no_store=True)
+
 def homeP(request):
-    if 'q' in request.GET:
-        q = request.GET['q']
-        prof = Professeurs.objects.filter(
-            Q(NNI__icontains=q) |
-            Q(Nom__icontains=q) |
-            Q(Nodep__Nom__icontains=q) |
-            Q(Type__icontains=q) |
-            Q(Telephone__icontains=q) |
-            Q(Email__icontains=q) |
-            Q(sexe__icontains=q) |
-            Q(Grade__nomGrade__icontains=q)
-        )
-    else:   
-        prof = Professeurs.objects.all()
+    no = request.GET.get('no', '')
+    nom = request.GET.get('nom', '')
+    sexe = request.GET.get('sexe', '')
+    nodep = request.GET.get('nodep', '')
+    type = request.GET.get('type', '')
+
+    prof = Professeurs.objects.all()
+
+    if no:
+        prof = prof.filter(No__istartswith=no)
+    if nom:
+        prof = prof.filter(Nom__istartswith=nom)
+    if sexe:
+        prof = prof.filter(sexe__istartswith=sexe)
+    if nodep:
+        prof = prof.filter(Nodep__Nom__istartswith=nodep)
+    if type:
+        prof = prof.filter(Type__istartswith=type)
+
     return render(request, 'Listprof.html', {'professeurs': prof})
+
+
+
 
 
 @login_required
@@ -490,21 +529,23 @@ def mat(request, filiere_id):
 # update matiere
 
 
-def updatemat(request, Nummat):
+def updateMat(request,Nummat):
     matiere = get_object_or_404(Matieres, Nummat=Nummat)
 
     if request.method == "POST":
-        mat = request.POST["mat"]
+        mat = request.POST.get("mat")
 
-        # Vérifier si les champs sont vides
+        # Vérifier si le champ est vide
         if mat:
             matiere.Mat = mat
             matiere.save()
-            messages.success(request, "Modifié avec succès")
+            messages.success(request, "Matière modifiée avec succès.")
+            return redirect("updatemat", Nummat=Nummat)
         else:
-            messages.error(request, "Veuillez remplir tous les champs")
+            messages.error(request, "Veuillez remplir tous les champs.")
 
-    return render(request, "updatemat.html", {"matieres": matiere})
+    return render(request, "updatemat.html", {"matiere": matiere})
+
 
 
 # delete matiere
@@ -1012,10 +1053,6 @@ def export_to_pdfCollectif(request):
 
 
 
-
-
-
-
 from django.http import JsonResponse
 from .models import Salles
 
@@ -1032,3 +1069,283 @@ def get_salles(request):
     }
 
     return JsonResponse(data)
+
+from django.shortcuts import render
+from datetime import timedelta
+
+from django.shortcuts import render
+from datetime import timedelta
+from .models import Semaine, DateJour, Jours
+
+from datetime import timedelta
+from datetime import datetime, timedelta
+from .models import Semaine, DateJour, Jours
+
+def enregistrer_debut_semaines(request):
+    if request.method == 'POST':
+        # Récupérer la date de début à partir du formulaire
+        date_debut = request.POST.get('date-debut')
+
+        # Convertir la date de début en objet de type datetime
+        date_debut = datetime.strptime(date_debut, '%Y-%m-%d')
+
+        # Parcourir les 16 semaines
+        for i in range(16):
+            # Calculer la date du jour en ajoutant le numéro de semaine * 7 jours à la date de début
+            date_jour = date_debut + timedelta(days=i * 7)
+
+            # Calculer le numéro de la semaine
+            numero_semaine = "S" + str(i + 1)
+
+            # Vérifier si le numéro de semaine dépasse 16
+            if i >= 16:
+                numero_semaine = "S" + str(i - 15)  # Revenir à S1
+
+            # Récupérer la semaine correspondante s'il existe déjà
+            semaine = Semaine.objects.filter(semaine=numero_semaine).first()
+
+            if semaine is None:
+                # Créer une nouvelle instance de Semaine avec le numéro de semaine
+                semaine = Semaine(semaine=numero_semaine, gen=False)
+                semaine.save()
+
+            # Récupérer tous les jours de la semaine
+            jours_semaine = Jours.objects.all()
+
+            # Créer une nouvelle instance de DateJour pour chaque jour de la semaine
+            for j, jour in enumerate(jours_semaine):
+                # Calculer la date du jour en ajoutant j jours à la date de début de la semaine
+                date_jour_semaine = date_jour + timedelta(days=j)
+
+                # Formater la date du jour
+                date_jour_str = date_jour_semaine.strftime('%Y-%m-%d')
+
+                # Créer une instance de DateJour avec la semaine, le jour et la date correspondants
+                date_jour_obj = DateJour(Semaine=semaine, NumJour=jour, DateJour=date_jour_str)
+
+                # Sauvegarder l'instance dans la base de données
+                date_jour_obj.save()
+
+        # Afficher un message de succès ou rediriger vers une autre page
+        return render(request, 'filiere.html')
+
+    return render(request, 'DateJoursCreate.html')
+
+
+from django.shortcuts import render
+from .models import Semaine, Cours, DateJour
+
+def affichCoursSemaine(request):
+    cours_semaine = Cours.objects.filter(semaine__gen=True)
+    semaines = Semaine.objects.filter(gen=True)
+    jours = Jours.objects.all()
+
+    context = {
+        'cours_semaine': cours_semaine,
+        'jours': jours,
+        'semaines': semaines
+    }
+    return render(request, 'affichCoursSemaine.html', context)
+
+def generer_semaine(request):
+    if request.method == 'POST':
+        semaine_ids = request.POST.getlist('semaines')
+        
+        if not semaine_ids:
+            message = "Veuillez sélectionner au moins une semaine."
+            semaines = Semaine.objects.filter(gen=False)
+            context = {'semaines': semaines, 'error_message': message}
+            return render(request, 'afficher_semaines.html', context)
+        
+        semaines = Semaine.objects.filter(id__in=semaine_ids)
+        semaines_precedentes_non_generees = Semaine.objects.filter(gen=False, id__lt=semaine_ids[0])
+        
+        if semaines_precedentes_non_generees.exists():
+            message = "Veuillez d'abord générer les semaines précédentes."
+            semaines = Semaine.objects.filter(gen=False)
+            context = {'semaines': semaines, 'error_message': message}
+            return render(request, 'afficher_semaines.html', context)
+        
+        for semaine in semaines:
+            semaine.gen = True
+            semaine.save()
+
+        jours = Jours.objects.all()
+        
+        for jour in jours:
+            date_jours = DateJour.objects.filter(Semaine__in=semaines, NumJour=jour)
+
+            for date_jour in date_jours:
+                emplois_cours = EmploisCours.objects.filter(NumJour=jour)
+
+                for emploi in emplois_cours:
+                    cours_existant = Cours.objects.filter(
+                        matricule=emploi.Matricule,
+                        noprfl=emploi.NOPRFL,
+                        mat=emploi.Mat,
+                        cd_horaire=emploi.Cd_Horaire,
+                        salle=emploi.salle,
+                        semaine=date_jour.Semaine,
+                        CDDateJour=date_jour,
+                        NumJour=jour,
+                        natcours=emploi.NatCours
+                    ).exists()
+
+                    if not cours_existant:
+                        cours = Cours(
+                            matricule=emploi.Matricule,
+                            noprfl=emploi.NOPRFL,
+                            mat=emploi.Mat,
+                            cd_horaire=emploi.Cd_Horaire,
+                            salle=emploi.salle,
+                            semaine=date_jour.Semaine,
+                            CDDateJour=date_jour,
+                            NumJour=jour,
+                            natcours=emploi.NatCours
+                        )
+                        cours.save()
+
+        cours_semaine = Cours.objects.filter(semaine__in=semaines)
+        semaines = Semaine.objects.filter(gen=True)
+        context = {
+            'cours_semaine': cours_semaine,
+            'jours': jours,
+            'semaines': semaines
+        }
+        return render(request, 'affichCoursSemaine.html', context)
+
+    semaines = Semaine.objects.filter(gen=False)
+    context = {'semaines': semaines}
+    return render(request, 'afficher_semaines.html', context)
+
+
+def liste_jours(request, semaine_id):
+    semaine = Semaine.objects.get(id=semaine_id)
+    jours = Jours.objects.all()
+    context = {'semaine': semaine, 'jours': jours}
+    return render(request, 'liste_jours.html', context)
+
+def afficher_cours_jour(request, semaine_id, jour_id):
+    semaine = Semaine.objects.get(id=semaine_id)
+    jour = Jours.objects.get(NumJour=jour_id)
+    cours_jour = Cours.objects.filter(semaine=semaine, NumJour=jour)
+
+    cours_html = ''
+    if cours_jour:
+        cours_html += '<div class="container">'
+        cours_html += '<link rel="stylesheet" href="{% static \'assets/plugins/bootstrap/css/bootstrap.min.css\' %}">'
+        cours_html += '<link rel="stylesheet" href="{% static \'assets/plugins/feather/feather.css\' %}">'
+        cours_html += '<link rel="stylesheet" href="{% static \'assets/plugins/icons/flags/flags.css\' %}">'
+        cours_html += '<link rel="stylesheet" href="{% static \'assets/plugins/fontawesome/css/fontawesome.min.css\' %}">'
+        cours_html += '<link rel="stylesheet" href="{% static \'assets/plugins/fontawesome/css/all.min.css\' %}">'
+        cours_html += '<link rel="stylesheet" href="{% static \'assets/plugins/select2/css/select2.min.css\' %}">'
+        cours_html += '<link rel="stylesheet" href="{% static \'assets/css/style.css\' %}">'
+        cours_html += '<script src="{% static \'assets/js/jquery-3.6.0.min.js\' %}"></script>'
+        cours_html += '<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">'
+        cours_html += '<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">'
+    
+        cours_html += '<div class="table-responsive">'
+        cours_html += '<table class="table">'
+        cours_html += '<thead>'
+        cours_html += '<tr>'
+        cours_html += '<th>Matricule</th>'
+        cours_html += '<th>Téléphone</th>'
+        cours_html += '<th>NOPRFL</th>'
+        cours_html += '<th>Mat</th>'
+        cours_html += '<th>Cd_Horaire</th>'
+        cours_html += '<th>Salle</th>'
+        cours_html += '<th>CDDateJour</th>'
+        cours_html += '<th>Vl</th>'
+        cours_html += '</tr>'
+        cours_html += '</thead>'
+        cours_html += '<tbody>'
+        for cours in cours_jour:
+            cours_html += '<tr>'
+            cours_html += '<td> ' + str(cours.matricule.Nom) + '</td>'
+            cours_html += '<td> ' + str(cours.matricule.Telephone) + '</td>'
+            cours_html += '<td>' + str(cours.noprfl.LibelleProfil) + '</td>'
+            cours_html += '<td> ' + str(cours.mat.Mat) + '</td>'
+            cours_html += '<td> ' + str(cours.cd_horaire.HCours) + '</td>'
+            cours_html += '<td> ' + str(cours.salle.NomSalles) + '</td>'
+            cours_html += '<td> ' + str(cours.CDDateJour.DateJour) + '</td>'
+            cours_html += '<td>' + ('fait' if cours.vl else '') + '</td>'
+
+
+            cours_html += '</tr>'
+        cours_html += '</tbody>'
+        cours_html += '</table>'
+    else:
+      cours_html = '<p>Aucun cours disponible pour cette semaine et ce jour.</p>'
+
+    return HttpResponse(cours_html)
+
+def remplir_cours(request, semaine_id, jour_id):
+    semaine = Semaine.objects.get(id=semaine_id)
+    jour = Jours.objects.get(NumJour=jour_id)
+    cours = Cours.objects.filter(semaine=semaine, NumJour=jour)
+
+    context = {'cours': cours}
+    return render(request, 'remplir_cours.html', context)
+
+
+import json
+
+def enregistrer_cours(request):
+    if request.method == 'POST':
+        cours_data = json.loads(request.POST.get('coursData'))
+        
+    for cours in cours_data:
+        try:
+            cours_obj = Cours.objects.get(ID=cours['id'])
+            cours_obj.vl = cours['vl']
+            cours_obj.save()
+        except Cours.DoesNotExist:
+        # Gérer le cas où aucun objet Cours correspondant à l'ID n'est trouvé
+            pass
+
+        return HttpResponse('Les cours ont été enregistrés avec succès !')
+   
+
+from django.shortcuts import render
+from .models import Matieres, Cours
+
+from django.shortcuts import render
+from .models import Matieres, Cours
+from django.db.models import Count
+
+
+
+from django.shortcuts import render
+from .models import Matieres, Cours
+
+def matSuivie(request):
+    matieres = Matieres.objects.all()
+
+    for matiere in matieres:
+        matiere.planification = {
+            'CM': Cours.objects.filter(mat=matiere, natcours='CM', vl=True).count(),
+            'TD': Cours.objects.filter(mat=matiere, natcours='TD', vl=True).count(),
+            'TP': Cours.objects.filter(mat=matiere, natcours='TP', vl=True).count(),
+            'PR': Cours.objects.filter(mat=matiere, natcours='Projet', vl=True).count()
+        }
+
+        matiere.realisation = {
+            'CM': Cours.objects.filter(mat=matiere, vl=True, natcours='CM').count(),
+            'TD': Cours.objects.filter(mat=matiere, vl=True, natcours='TD').count(),
+            'TP': Cours.objects.filter(mat=matiere, vl=True, natcours='TP').count(),
+            'PR': Cours.objects.filter(mat=matiere, vl=True, natcours='Projet').count()
+        }
+
+      
+        matiere.avancement = {
+                'CM': round((matiere.realisation['CM'] / matiere.CM ) * 100, 2),
+                'TD': round((matiere.realisation['TD'] / matiere.TD) * 100, 2),
+                'TP': round((matiere.realisation['TP'] / matiere.TP) * 100, 2),
+                'PR': round((matiere.realisation['PR'] / matiere.PR) * 100, 2)
+            }
+      
+    context = {
+        'Matieres': matieres
+    }
+
+    return render(request, 'Suivie_matieres.html', context)

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 
 {% load static %}
@@ -24,8 +26,14 @@
 <link rel="stylesheet" href="{% static 'assets/plugins/select2/css/select2.min.css' %}">
 
 <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+ 
 
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
 
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+
+<!-- Fichier JavaScript -->
 
 
 </head>
@@ -184,69 +192,105 @@
     
 
 
+
+
+
 <div class="page-wrapper">
-<div class="content container-fluid">
-
-<div class="page-header">
-<div class="row align-items-center">
-<div class="col">
-<h3 class="page-title"></h3>
-<ul class="breadcrumb">
-<li class="breadcrumb-item active"><a href="/filiere">Retour au Liste</a></li>
-</ul>
-</div>
-</div>
-</div>
-
-<div class="row">
-<div class="col-sm-12">
-<div class="card">
-<div class="card-body">
-  
-
-{% block content %}
-
-<form method="post" action="{% url 'updatemat' matieres.Nummat %}">
-    {% csrf_token %}
-    <h1>{{ matieres.Nummat }}</h1>
-    <table class="table table-bordered">
-        <tr>
-            <th>Libelle de Filiere </th>
-            <td>
-                <input value="{{ matieres.Mat }}" type="text" name="mat" class="form-control" />
-            </td>
-        </tr>
-       
-        
-            <td colspan="2">
-                <button type="submit" class="btn btn-primary">Modifier</button>
+    <div class="content container-fluid">
+    
+    <div class="page-header">
+    <div class="row align-items-center">
+    <div class="col">
+   
+    </ul>
+    </div>
+    </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-sm-12"> 
+            <div class="card card-table">
+                <div class="card-body">
+                    <h2>Liste des Cours pour la semaine {{ semaine.semaine }} :</h2>
+                    <br><br><br>
             
-            </td>
-        </tr>
-    </table>
-</form>
-{% endblock %}
+                    <form onsubmit="return false;">
+                        <!-- Reste du contenu du formulaire -->
+                        {% csrf_token %}
+                        <div class="col-12 col-sm-4">
+                            <div class="form-group local-forms">
+                                <label for="jours">Sélectionnez un jour :</label>
+                                <select id="jours" name="jour" class="form-control">
+                                    <option value="" selected disabled hidden>-----</option> <!-- Option "-----" par défaut -->
+                                    {% for jour in jours %}
+                                    <option value="{{ jour.NumJour }}">{{ jour.NomJour }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
 
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
 
-</div>
+                   
 
 
-<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
 
-<script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
-<script src="{% static 'assets/js/feather.min.js' %}"></script>
 
-<script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
 
-<script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
+                   
+                    <div id="cours-container"></div>
+                    <button id="btn-remplir" class="btn btn-outline-primary me-2">Remplir</button>
+                    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                    <script>
+                    $(document).ready(function() {
+                        $('#btn-remplir').click(function() {
+                            var semaineId = "{{ semaine.id }}";
+                            var jourId = $('#jours').val();
+                            
+                            // Redirige vers la page de remplissage avec les paramètres
+                            window.location.href = "/remplir_cours/" + semaineId + "/" + jourId + "/";
+                        });
+                    });
+                    
+                  
+                      var semaineId = "{{ semaine.id }}";
+                        $(document).ready(function() {
+                            $('#jours').change(function() {
+                                var jourId = $(this).val();
+                                
+                                $.ajax({
+                                    url: '/api/afficher_cours_jour/' + semaineId + '/' + jourId + '/',
+                                    type: 'GET',
+                                    success: function(response) {
+                                        $('#cours-container').html(response);
+                                    },
+                                    error: function(xhr, status, error) {
+                                        console.log(error);
+                                    }
+                                });
+                            });
+                        });
+                    </script>
+            
+    
 
-<script src="{% static 'assets/js/script.js' %}"></script>
+
+
+    <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+   
+   <script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+   
+   <script src="{% static 'assets/js/feather.min.js' %}"></script>
+   
+   <script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+   
+   <script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
+   
+   <script src="{% static 'assets/js/script.js' %}"></script>
+
+
 </body>
 </html>

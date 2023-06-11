@@ -17,6 +17,7 @@ urlpatterns = [
     path('addFil', views.addF, name='addF'),
     path('addm/<slug:filiere_id>', views.addM, name='addM'),
     path('addp', views.addprof, name='addp'),
+    path('matSuivie', views.matSuivie, name='matSuivie'),
     path('salle', views.home, name='salle'),
     path('filiere', views.homeF, name='filiere'),
     path('ListeEmplois', views.ListeEmplois, name='ListeEmplois'),
@@ -30,7 +31,7 @@ urlpatterns = [
     path('delete/<slug:nomSalles>', views.destroy, name='delete'),
     path('updateS/<slug:nomSalles>', views.update, name='updateS'),
     path('updateFil/<slug:cdP>', views.updatefil, name='updateFil'),
-    path('updatemat/<slug:Nummat>', views.updatemat, name='updatemat'),
+    path('updateMat/<str:Nummat>', views.updateMat, name='updateMat'),
     path('updateCours/<slug:id>', views.updateCours, name='updateCours'),
     path('updateProf/<slug:matricule>', views.updateprof, name='updateP'),
     path('deleteF/<slug:codeF>', views.deleteF, name='deleteF'),
@@ -41,6 +42,14 @@ urlpatterns = [
     path('export_to_pdfCollectif', views.export_to_pdfCollectif, name='export_to_pdfCollectif'),
     path('get_salles/', views.get_salles, name='get_salles'),
     path('api/occupancy/', views.occupancy_api, name='occupancy_api'),
-]
+    path('enregistrer_debut_semaines/', views.enregistrer_debut_semaines, name='enregistrer_debut_semaines'),
+    path('generer_semaine/', views.generer_semaine, name='generer_semaine'),
+    path('liste_jours/<int:semaine_id>/', views.liste_jours, name='liste_jours'),
+    path('api/afficher_cours_jour/<int:semaine_id>/<int:jour_id>/', views.afficher_cours_jour, name='afficher_cours_jour'),
+    path('remplir_cours/<int:semaine_id>/<int:jour_id>/', views.remplir_cours, name='remplir_cours'),
+    path('enregistrer_cours/', views.enregistrer_cours, name='enregistrer_cours'),
+    path('afficher_cours_semaine/', views.affichCoursSemaine, name='affichCoursSemaine'),
+
+]   
    
 

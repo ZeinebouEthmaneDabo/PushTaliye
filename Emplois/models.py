@@ -55,6 +55,7 @@ def _str_(self):
 class Professeurs(models.Model):
     NNI = models.IntegerField(primary_key=True)
     Nom = models.CharField(max_length=200)
+    CompteBancaire=models.CharField(max_length=200)
     Nodep = models.ForeignKey(DEPART, on_delete=models.CASCADE)
     Type = models.CharField(max_length=50)
     Telephone = models.IntegerField()
@@ -105,8 +106,17 @@ def _str_(self):
 class Matieres(models.Model):
     Mat = models.CharField(max_length=200)
     Noprfl = models.ForeignKey(Profil, on_delete=models.CASCADE)
-    Nummat = models.AutoField(primary_key=True)
+    Nummat = models.CharField(max_length=50, primary_key=True)
     Sem = models.ForeignKey(Semestre, on_delete=models.CASCADE)
+    CM = models.IntegerField()
+    TD = models.IntegerField()
+    TP = models.IntegerField()
+    PR = models.IntegerField()
+   
+
+
+
+
 
 def _str_(self):
     return f"({self.Mat})"
@@ -129,6 +139,7 @@ class AnneeEnCours(models.Model):
             annee_obj.save()
         else:
             AnneeEnCours.objects.create(annee=2023)  # Crée un nouvel objet si aucun n'existe
+
 
 class EmploisCours(models.Model):
     id = models.CharField(primary_key=True, max_length=50)
@@ -179,28 +190,31 @@ class PgmemptempsSI(models.Model):
 # Partie Suivi
 
 
-# class Semaine(models.Model):
-#     semaine=models.CharField(max_length=50)
-#     gen=models.BooleanField(default=False)
+class Semaine(models.Model):
+    semaine=models.CharField(max_length=50)
+    gen=models.BooleanField(default=False)
 
 
-# class DateJour(models.Model):
-#     CDDateJour=models.IntegerField(primary_key=True)
-#     Semaine=models.CharField(max_length=50)
-#     NumJour=models.IntegerField()
-#     DateJour=models.DateField()
+class DateJour(models.Model):
+    CDDateJour=models.AutoField(primary_key=True)
+    Semaine= models.ForeignKey(Semaine, on_delete=models.CASCADE)
+    NumJour=models.ForeignKey(Jours, on_delete=models.CASCADE)
+    DateJour=models.DateField()
 
 
-# class Cours(models.Model):
-#     ID=models.IntegerField(primary_key=True)  
-#     matricule=models.CharField(max_length=50)
-#     noprfl=models.CharField(max_length=50)
-#     mat=models.CharField(max_length=50)
-#     cd_horaire=models.IntegerField()
-#     salle=models.CharField(max_length=50)
-#     semaine=models.CharField(max_length=50)
-#     CDDateJour=models.IntegerField()
-#     DateJour=models.DateField()
-#     vl=models.BooleanField(default=False)
-#     NumJour=models.IntegerField()
-#     natcours=models.CharField(max_length=50)
+class Cours(models.Model):
+    ID=models.AutoField(primary_key=True)  
+    matricule=models.ForeignKey(Professeurs, on_delete=models.CASCADE)
+    noprfl=models.ForeignKey(Profil, on_delete=models.CASCADE)
+    mat=models.ForeignKey(Matieres, on_delete=models.CASCADE)
+    cd_horaire=models.ForeignKey(Horaire, on_delete=models.CASCADE)
+    salle=models.ForeignKey(Salles, on_delete=models.CASCADE)
+    semaine=models.ForeignKey(Semaine, on_delete=models.CASCADE)
+    CDDateJour=models.ForeignKey(DateJour, on_delete=models.CASCADE)
+    vl=models.BooleanField(default=False)
+    NumJour=models.ForeignKey(Jours, on_delete=models.CASCADE)
+    natcours=models.ForeignKey(typeCours, on_delete=models.CASCADE)
+    annee = models.ForeignKey(AnneeEnCours, on_delete=models.CASCADE, default=2023) 
+
+
+    

@@ -39,140 +39,157 @@
 </head>
 <body>
 
-<div class="main-wrapper">
-
-<div class="header">
-
-<div class="header-left">
-<a href="index.html" class="">
-<img src="{% static 'assets/img/logo.png' %}" alt="Logo">
-</a>
-
-</div>
-
-<div class="menu-toggle">
-<a href="javascript:void(0);" id="toggle_btn">
-<i class="fas fa-bars"></i>
-</a>
-</div>
-
-
-
-
-<a class="mobile_btn" id="mobile_btn">
-<i class="fas fa-bars"></i>
-</a>
-
-
-<ul class="nav user-menu">
-<li class="nav-item dropdown language-drop me-2">
-<a href="#" class="dropdown-toggle nav-link header-nav-list" data-bs-toggle="dropdown">
-<img src="{% static 'assets/img/france.png' %}" alt="">
-</a>
-<div class="dropdown-menu">
-
-<a class="dropdown-item" href="javascript:;"><i class="flag flag-bl me-2"></i>Francais</a>
-
-</div>
-</li>
-
-
-
-<li class="nav-item zoom-screen me-2">
-<a href="#" class="nav-link header-nav-list">
-<img src="{% static 'assets/img/header-icon-04.svg' %}" alt="">
-</a>
-</li>
-
-<li class="nav-item dropdown has-arrow new-user-menus">
-<a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
-<span class="user-img">
-<img class="rounded-circle" src="{% static 'assets/img/admin.jpg' %}" width="31" >
-<div class="user-text">
-    <h6>{{ user.username }}</h6>
-    <p class="text-muted mb-0"></p>
+    <div class="main-wrapper">
+    
+    <div class="header">
+    
+    <div class="header-left">
+    <a href="index.html" class="">
+    <img src="{% static 'assets/img/logo.png' %}" alt="Logo">
+    </a>
+    
     </div>
-    </span>
-    </a> 
+    
+    <div class="menu-toggle">
+    <a href="javascript:void(0);" id="toggle_btn">
+    <i class="fas fa-bars"></i>
+    </a>
+    </div>
+    
+    
+    
+    
+    <a class="mobile_btn" id="mobile_btn">
+    <i class="fas fa-bars"></i>
+    </a>
+    
+    
+    <ul class="nav user-menu">
+    <li class="nav-item dropdown language-drop me-2">
+    <a href="#" class="dropdown-toggle nav-link header-nav-list" data-bs-toggle="dropdown">
+    <img src="{% static 'assets/img/france.png' %}" alt="">
+    </a>
     <div class="dropdown-menu">
     
+    <a class="dropdown-item" href="javascript:;"><i class="flag flag-bl me-2"></i>Francais</a>
     
-        <a class="dropdown-item" href="/profiladmi">profil</a>
-    
-    <a class="dropdown-item" href="/signout">Logout</a>
-</div>
-</li>
-
-</ul>
-
-</div>
-
-
-<div class="sidebar" id="sidebar">
-<div class="sidebar-inner slimscroll">
-<div id="sidebar-menu" class="sidebar-menu">
-<ul>
-<li class="menu-title">
-<span> Menu</span>
-</li>
-<li class="">
-    <a href="/index"><i class="feather-home"></i> <span> Acceuil</span> <span class=""></span></a>
+    </div>
     </li>
-<li class="submenu">
-<a href="#"><i class="feather-grid"></i> <span> Tableau de bord</span> <span class="menu-arrow"></span></a>
- <ul>
-<li><a href="/listrespo">Liste des responsable</a></li>
-<li><a href="/singup">Ajouter des responsable</a></li>
-</ul>
-</li>
-
-<li class="submenu">
-<a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Professeurs</span> <span class="menu-arrow"></span></a>
-<ul>
-    <li><a href="/Listeprof">Liste des Professeurs</a></li>
-    <li><a href="/addp">Ajouter des Professeurs</a></li>
-</ul>
-</li>
-<li class="submenu">
-<a href="#"><i class="fas fa-building"></i> <span> Salles</span> <span class="menu-arrow"></span></a>
-<ul>
-<li><a href="/salle">Liste des Salles</a></li>
-<li><a href="/add">Ajouter des Salles</a></li>
-</ul>
-</li>
-<li class="submenu">
-<a href="#"><i class="fas fa-book-reader"></i> <span> Profile</span> <span class="menu-arrow"></span></a>
-<ul>
-    <li><a href="/filiere">Liste des Profile</a></li>
-    <li><a href="/addFil">Ajouter des Profile</a></li>
-</ul>
-</li>
-
-<li class="menu-title">   
-<span>Emplois</span>           
-</li>
-<li class="submenu">
-    <a href="#"><i class="fas fa-calendar-alt"></i> <span> Emplois</span> <span class="menu-arrow"></span></a>
-    <ul>
-        <li>
-            <a href="/ListeEmplois"> <span>Liste des Emplois</span></a>
+    
+    
+    
+    <li class="nav-item zoom-screen me-2">
+    <a href="#" class="nav-link header-nav-list">
+    <img src="{% static 'assets/img/header-icon-04.svg' %}" alt="">
+    </a>
+    </li>
+    
+    <li class="nav-item dropdown has-arrow new-user-menus">
+    <a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
+    <span class="user-img">
+    <img class="rounded-circle" src="{% static 'assets/img/admin.jpg' %}" width="31" >
+    <div class="user-text">
+        <h6>{{ user.username }}</h6>
+        <p class="text-muted mb-0"></p>
+        </div>
+        </span>
+        </a> 
+        <div class="dropdown-menu">
+        
+        
+        <a class="dropdown-item" href="/profiladmi">profil</a>
+        
+        <a class="dropdown-item" href="/signout">Logout</a>
+    </div>
+    </li>
+    
+    </ul>
+    
+    </div>
+    
+    
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-inner slimscroll">
+            <div id="sidebar-menu" class="sidebar-menu">
+                <ul>
+                    <li class="menu-title">
+                        <span>Menu</span>
+                    </li>
+                    <li class="">
+                        <a href="/index"><i class="feather-home"></i> <span>Acceuil</span> <span class=""></span></a>
+                    </li>
+                    {% if user.username == "admin" %}
+                    <li class="submenu">
+                        <a href="#"><i class="feather-grid"></i> <span>Tableau de bord</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                           
+                            <li><a href="/listrespo">Liste des responsable</a></li>
+                            <li><a href="/singup">Ajouter des responsable</a></li>
+                           
+                        </ul>
+                    </li>
+                    {% endif %}
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span>Professeurs</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="/Listeprof">Liste des Professeurs</a></li>
+                            <li><a href="/addp">Ajouter des Professeurs</a></li>
+                        </ul>
+                    </li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-building"></i> <span>Salles</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="/salle">Liste des Salles</a></li>
+                            <li><a href="/add">Ajouter des Salles</a></li>
+                        </ul>
+                    </li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-book-reader"></i> <span>Filieres</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="/filiere">Liste des Filieres</a></li>
+                            <li><a href="/addFil">Ajouter des Filieres</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-title">
+                        <span>Emplois</span>
+                    </li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-calendar-alt"></i> <span>Emplois</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="/ListeEmplois">Emplois cours</a></li>
+                            <li><a href="/"> Emplois Professeurs</a></li>
+                            <li><a href="/"> Emplois salles</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-title">
+                        <span>Suivi</span>
+                    
+                       
+        
+    
+        </li>
+    
+        <li class="submenu">
+            <a href="#"><i class="fas fa-tasks"></i> <span> Suivi</span> <span class="menu-arrow"></span></a>
+            <ul>
+                <li>
+                    <a href="/generer_semaine"> <span>Suivi des cours</span></a>
+                    <a href="/matSuivie"> <span>Suivi des Matieres</span></a>
+                    <a href="/enregistrer_debut_semaines"> <span>Date Jour</span></a>
+                    </li>
+                  
+            
+            </ul>
             </li>
-          
+    </li>
     
     </ul>
     </li>
-
-<li class="menu-title">
-    <span>Suivi</span>
-    </li>
-</li>
-
-</ul>
-</li>
-</ul>
-</div>
-</div>
-</div>
+    </ul>
+    </div>
+    </div>
+    </div>
+    
 
 
 
@@ -192,24 +209,63 @@
     </div>
     </div>
     </div>
-  <form>
-    <div class="student-group-form">
-    <div class="row">
-    <div class="col-lg-3 col-md-6">
-    <div class="form-group">
-    <input type="text" name="q" class="form-control" placeholder=" ">
-    </div>
-    </div>
-    
+    <form id="search-form" method="GET">
+        <div class="student-group-form">
+          <div class="row">
+            <div class="col-lg-3 col-md-6">
+              <div class="form-group">
+                <input type="text" name="nom" id="nom-input" class="form-control" placeholder="Rechercher par nom" value="{{ request.GET.nom }}">
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <div class="form-group">
+                <input type="text" name="sexe" id="sexe-input" class="form-control" placeholder="Rechercher par sexe" value="{{ request.GET.sexe }}">
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <div class="form-group">
+                <input type="text" name="nodep" id="nodep-input" class="form-control" placeholder="Rechercher par departement " value="{{ request.GET.nodep }}">
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <div class="form-group">
+                <input type="text" name="type" id="type-input" class="form-control" placeholder="Rechercher par type" value="{{ request.GET.type }}">
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+      
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script>
+        $(document).ready(function() {
+          var typingTimer;
+          var doneTypingInterval = 500; // In milliseconds (adjust as needed)
+          var searchInputs = $('#nom-input, #sexe-input, #nodep-input, #type-input');
+      
+          searchInputs.on('input', function() {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(submitSearch, doneTypingInterval);
+          });
+      
+          function submitSearch() {
+            $('#search-form').submit();
+          }
+        });
+      </script>
 
-    <div class="col-lg-2">
-    <div class="search-student-btn">
-    <button type="submit" class="btn btn-primary">Rechercher</button>
-    </div>
-    </div>
-    </div>
-    </div>
-  </form>
+      <script>
+       
+
+      </script>
+
+
+
+      
+      
+      
+      
+      
     <div class="row">
     <div class="col-sm-12">
     <div class="card card-table">
@@ -277,6 +333,32 @@
             
         </table>
         
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            if (!$.fn.DataTable.isDataTable('#myTable')) {
+                $('#myTable').DataTable({
+                    language: {
+                        "lengthMenu": "Afficher _MENU_ entrées",
+                        "info": "Affichage de _START_ à _END_ sur _TOTAL_ entrées",
+                        "infoEmpty": "Affichage de 0 à 0 sur 0 entrée",
+                        "infoFiltered": "(filtré à partir de _MAX_ entrées au total)",
+                        "search": "Rechercher:",
+                        "paginate": {
+                            "first": "Premier",
+                            "last": "Dernier",
+                            "next": "Suivant",
+                            "previous": "Précédent"
+                        }
+                    }
+                });
+            }
+        });
+
+        
+    </script>
+        
         {% endblock %}
         
     </div>
@@ -288,6 +370,8 @@
         </footer>
     </div>
     </div>
+    
+
     
     
 

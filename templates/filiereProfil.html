@@ -1,312 +1,3 @@
-<!-- <!DOCTYPE html>
-
-{% load static %}
-
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-<title>ISCAEMP - ISCAE</title>
-
-<link rel="shortcut icon" href="{% static 'assets/img/favicon.png' %}">
-
-<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;0,900;1,400;1,500;1,700&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="{% static 'assets/plugins/bootstrap/css/bootstrap.min.css' %}">
-
-<link rel="stylesheet" href="{% static 'assets/plugins/feather/feather.css' %}">
-
-<link rel="stylesheet" href="{% static 'assets/plugins/icons/flags/flags.css' %}">
-
-<link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/fontawesome.min.css' %}">
-<link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/all.min.css' %}">
-
-<link rel="stylesheet" href="{% static 'assets/plugins/select2/css/select2.min.css' %}">
-
-<link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
-
-
-
-
-</head>
-<body>
-
-<div class="main-wrapper">
-
-<div class="header">
-
-<div class="header-left">
-<a href="index.html" class="">
-<img src="{% static 'assets/img/logo.png' %}" alt="Logo">
-</a>
-
-</div>
-
-<div class="menu-toggle">
-<a href="javascript:void(0);" id="toggle_btn">
-<i class="fas fa-bars"></i>
-</a>
-</div>
-
-
-
-
-<a class="mobile_btn" id="mobile_btn">
-<i class="fas fa-bars"></i>
-</a>
-
-
-<ul class="nav user-menu">
-<li class="nav-item dropdown language-drop me-2">
-<a href="#" class="dropdown-toggle nav-link header-nav-list" data-bs-toggle="dropdown">
-<img src="{% static 'assets/img/france.png' %}" alt="">
-</a>
-<div class="dropdown-menu">
-
-<a class="dropdown-item" href="javascript:;"><i class="flag flag-bl me-2"></i>Francais</a>
-
-</div>
-</li>
-
-
-
-<li class="nav-item zoom-screen me-2">
-<a href="#" class="nav-link header-nav-list">
-<img src="{% static 'assets/img/header-icon-04.svg' %}" alt="">
-</a>
-</li>
-
-<li class="nav-item dropdown has-arrow new-user-menus">
-<a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
-<span class="user-img">
-<img class="rounded-circle" src="{% static 'assets/img/admin.jpg' %}" width="31" >
-<div class="user-text">
-    <h6>{{ user.username }}</h6>
-    <p class="text-muted mb-0"></p>
-    </div>
-    </span>
-    </a> 
-    <div class="dropdown-menu">
-    
-    
-    <a class="dropdown-item" href="inbox.html">changer mot de passe</a>
-    
-    <a class="dropdown-item" href="/signout">Logout</a>
-</div>
-</li>
-
-</ul>
-
-</div>
-
-
-<div class="sidebar" id="sidebar">
-<div class="sidebar-inner slimscroll">
-<div id="sidebar-menu" class="sidebar-menu">
-<ul>
-<li class="menu-title">
-<span> Menu</span>
-</li>
-<li class="">
-    <a href="/index"><i class="feather-home"></i> <span>Acceuil</span> <span class=""></span></a>
-    </li>
-<li class="submenu">
-<a href="#"><i class="feather-grid"></i> <span> Tableau de bord</span> <span class="menu-arrow"></span></a>
- <ul>
-<li><a href="/listrespo">Liste des responsable</a></li>
-<li><a href="/singup">Ajouter des responsable</a></li>
-</ul>
-</li>
-
-<li class="submenu">
-<a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Professeurs</span> <span class="menu-arrow"></span></a>
-<ul>
-    <li><a href="/Listeprof">Liste des Professeurs</a></li>
-    <li><a href="/addp">Ajouter des Professeurs</a></li>
-</ul>
-</li>
-<li class="submenu">
-<a href="#"><i class="fas fa-building"></i> <span> Salles</span> <span class="menu-arrow"></span></a>
-<ul>
-<li><a href="/salle">Liste des Salles</a></li>
-<li><a href="/add">Ajouter des Salles</a></li>
-</ul>
-</li>
-<li class="submenu">
-<a href="#"><i class="fas fa-book-reader"></i> <span> Profile</span> <span class="menu-arrow"></span></a>
-<ul>
-    <li><a href="/filiere">Liste des Profile</a></li>
-    <li><a href="/addFil">Ajouter des Profile</a></li>
-</ul>
-</li>
-
-<li class="menu-title">   
-<span>Emplois</span>           
-</li>
-<li class="submenu">
-<a href="#"><i class="fas fa-calendar-alt"></i> <span> Emplois</span> <span class="menu-arrow"></span></a>
-<ul>
-    <li>
-        <a href="/cours"> <span>Ajout de cours</span></a>
-        </li>
-        <li>
-            <a href="/affichCours"><span>Liste Cours</span></a>
-        </li>
-
-</ul>
-</li>
-
-<li class="menu-title">
-    <span>Suivi</span>
-    </li>
-</li>
-
-</ul>
-</li>
-</ul>
-</div>
-</div>
-</div>
-
-
-
-
-
-
-<div class="page-wrapper">
-    <div class="content container-fluid">
-    
-    <div class="page-header">
-    <div class="row align-items-center">
-    <div class="col">
-    <h3 class="page-title">profiles</h3>
-    <ul class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/filiere">profiles</a></li>
-    <li class="breadcrumb-item active">Liste des profiles</li>
-    </ul>
-    </div>
-    </div>
-    </div>
-  
-    <div class="row">
-    <div class="col-sm-12">
-    <div class="card card-table">
-    <div class="card-body">
-    
-    <div class="page-header">
-    <div class="row align-items-center">
-    <div class="col">
-      
-   
-        <h1>Liste des matières pour la filière "{{ Profil.LibelleProfil }}"</h1>
-    </div>
-    <div class="col-auto text-end float-end ms-auto download-grp">
-    <a href="#" class="btn btn-outline-primary me-2"><i class="fas fa-download"></i> Download</a>
-    <a href="{% url 'addM' Profil.codeProfil %}" class="btn btn-primary"><i class="fas fa-plus"></i></a>
-    </div>
-    </div>
-    </div>
-    
-    <div class="table-responsive">
-    
-    <table class="table border-0 star-student table-hover table-center mb-0 datatable table-striped">
-    <thead class="student-thread">
-    <tr>
-        <th>Nummat</th>
-        <th>Nom</th>
-        
-            
-    <th class="text-end">Action</th>
-    </tr>
-    </thead>
-    
-    <tbody>
-  
-    <tr>
-       
-
-        {% for matiere in Matieres %}
-        <tr>
-          <td>{{ matiere.Nummat }}</td>
-          <td>{{ matiere.Mat }}</td>
-        
-           
-        
-    <td class="text-end">
-    <div class="actions">
-   
-    <a href="{% url 'updatemat' matiere.Nummat %}" class="btn btn-sm bg-danger-light">
-    <i class="feather-edit"></i>
-    </a>
-    <a href="{% url 'deletem' matiere.Nummat %}" class="btn btn-sm bg-danger-light">
-        <i class="fas fa-trash-alt"></i>
-        </a>
-
-    </div>
-    </td>
-    </tr>
-    {% endfor %}
-    </tbody>
-    </table>
-
-    </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
-
-<script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-
-<script src="{% static 'assets/js/feather.min.js' %}"></script>
-
-<script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
-
-<script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
-
-<script src="{% static 'assets/js/script.js' %}"></script>
-</body>
-</html> -->
-
-
-
-
-
-
-
-
-
 
 
 <!DOCTYPE html>
@@ -348,140 +39,157 @@
 </head>
 <body>
 
-<div class="main-wrapper">
-
-<div class="header">
-
-<div class="header-left">
-<a href="index.html" class="">
-<img src="{% static 'assets/img/logo.png' %}" alt="Logo">
-</a>
-
-</div>
-
-<div class="menu-toggle">
-<a href="javascript:void(0);" id="toggle_btn">
-<i class="fas fa-bars"></i>
-</a>
-</div>
-
-
-
-
-<a class="mobile_btn" id="mobile_btn">
-<i class="fas fa-bars"></i>
-</a>
-
-
-<ul class="nav user-menu">
-<li class="nav-item dropdown language-drop me-2">
-<a href="#" class="dropdown-toggle nav-link header-nav-list" data-bs-toggle="dropdown">
-<img src="{% static 'assets/img/france.png' %}" alt="">
-</a>
-<div class="dropdown-menu">
-
-<a class="dropdown-item" href="javascript:;"><i class="flag flag-bl me-2"></i>Francais</a>
-
-</div>
-</li>
-
-
-
-<li class="nav-item zoom-screen me-2">
-<a href="#" class="nav-link header-nav-list">
-<img src="{% static 'assets/img/header-icon-04.svg' %}" alt="">
-</a>
-</li>
-
-<li class="nav-item dropdown has-arrow new-user-menus">
-<a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
-<span class="user-img">
-<img class="rounded-circle" src="{% static 'assets/img/admin.jpg' %}" width="31" >
-<div class="user-text">
-    <h6>{{ user.username }}</h6>
-    <p class="text-muted mb-0"></p>
+    <div class="main-wrapper">
+    
+    <div class="header">
+    
+    <div class="header-left">
+    <a href="index.html" class="">
+    <img src="{% static 'assets/img/logo.png' %}" alt="Logo">
+    </a>
+    
     </div>
-    </span>
-    </a> 
+    
+    <div class="menu-toggle">
+    <a href="javascript:void(0);" id="toggle_btn">
+    <i class="fas fa-bars"></i>
+    </a>
+    </div>
+    
+    
+    
+    
+    <a class="mobile_btn" id="mobile_btn">
+    <i class="fas fa-bars"></i>
+    </a>
+    
+    
+    <ul class="nav user-menu">
+    <li class="nav-item dropdown language-drop me-2">
+    <a href="#" class="dropdown-toggle nav-link header-nav-list" data-bs-toggle="dropdown">
+    <img src="{% static 'assets/img/france.png' %}" alt="">
+    </a>
     <div class="dropdown-menu">
     
+    <a class="dropdown-item" href="javascript:;"><i class="flag flag-bl me-2"></i>Francais</a>
     
-        <a class="dropdown-item" href="/profiladmi">profil</a>
-    
-    <a class="dropdown-item" href="/signout">Logout</a>
-</div>
-</li>
-
-</ul>
-
-</div>
-
-
-<div class="sidebar" id="sidebar">
-<div class="sidebar-inner slimscroll">
-<div id="sidebar-menu" class="sidebar-menu">
-<ul>
-<li class="menu-title">
-<span> Menu</span>
-</li>
-<li class="">
-    <a href="/index"><i class="feather-home"></i> <span> Acceuil</span> <span class=""></span></a>
+    </div>
     </li>
-<li class="submenu">
-<a href="#"><i class="feather-grid"></i> <span> Tableau de bord</span> <span class="menu-arrow"></span></a>
- <ul>
-<li><a href="/listrespo">Liste des responsable</a></li>
-<li><a href="/singup">Ajouter des responsable</a></li>
-</ul>
-</li>
-
-<li class="submenu">
-<a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Professeurs</span> <span class="menu-arrow"></span></a>
-<ul>
-    <li><a href="/Listeprof">Liste des Professeurs</a></li>
-    <li><a href="/addp">Ajouter des Professeurs</a></li>
-</ul>
-</li>
-<li class="submenu">
-<a href="#"><i class="fas fa-building"></i> <span> Salles</span> <span class="menu-arrow"></span></a>
-<ul>
-<li><a href="/salle">Liste des Salles</a></li>
-<li><a href="/add">Ajouter des Salles</a></li>
-</ul>
-</li>
-<li class="submenu">
-<a href="#"><i class="fas fa-book-reader"></i> <span> Profile</span> <span class="menu-arrow"></span></a>
-<ul>
-    <li><a href="/filiere">Liste des Profile</a></li>
-    <li><a href="/addFil">Ajouter des Profile</a></li>
-</ul>
-</li>
-
-<li class="menu-title">   
-<span>Emplois</span>           
-</li>
-<li class="submenu">
-    <a href="#"><i class="fas fa-calendar-alt"></i> <span> Emplois</span> <span class="menu-arrow"></span></a>
-    <ul>
-        <li>
-            <a href="/ListeEmplois"> <span>Liste des Emplois</span></a>
+    
+    
+    
+    <li class="nav-item zoom-screen me-2">
+    <a href="#" class="nav-link header-nav-list">
+    <img src="{% static 'assets/img/header-icon-04.svg' %}" alt="">
+    </a>
+    </li>
+    
+    <li class="nav-item dropdown has-arrow new-user-menus">
+    <a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
+    <span class="user-img">
+    <img class="rounded-circle" src="{% static 'assets/img/admin.jpg' %}" width="31" >
+    <div class="user-text">
+        <h6>{{ user.username }}</h6>
+        <p class="text-muted mb-0"></p>
+        </div>
+        </span>
+        </a> 
+        <div class="dropdown-menu">
+        
+        
+        <a class="dropdown-item" href="/profiladmi">profil</a>
+        
+        <a class="dropdown-item" href="/signout">Logout</a>
+    </div>
+    </li>
+    
+    </ul>
+    
+    </div>
+    
+    
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-inner slimscroll">
+            <div id="sidebar-menu" class="sidebar-menu">
+                <ul>
+                    <li class="menu-title">
+                        <span>Menu</span>
+                    </li>
+                    <li class="">
+                        <a href="/index"><i class="feather-home"></i> <span>Acceuil</span> <span class=""></span></a>
+                    </li>
+                    {% if user.username == "admin" %}
+                    <li class="submenu">
+                        <a href="#"><i class="feather-grid"></i> <span>Tableau de bord</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                           
+                            <li><a href="/listrespo">Liste des responsable</a></li>
+                            <li><a href="/singup">Ajouter des responsable</a></li>
+                           
+                        </ul>
+                    </li>
+                    {% endif %}
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span>Professeurs</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="/Listeprof">Liste des Professeurs</a></li>
+                            <li><a href="/addp">Ajouter des Professeurs</a></li>
+                        </ul>
+                    </li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-building"></i> <span>Salles</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="/salle">Liste des Salles</a></li>
+                            <li><a href="/add">Ajouter des Salles</a></li>
+                        </ul>
+                    </li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-book-reader"></i> <span>Filieres</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="/filiere">Liste des Filieres</a></li>
+                            <li><a href="/addFil">Ajouter des Filieres</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-title">
+                        <span>Emplois</span>
+                    </li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-calendar-alt"></i> <span>Emplois</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="/ListeEmplois">Emplois cours</a></li>
+                            <li><a href="/"> Emplois Professeurs</a></li>
+                            <li><a href="/"> Emplois salles</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-title">
+                        <span>Suivi</span>
+                    
+                       
+        
+    
+        </li>
+    
+        <li class="submenu">
+            <a href="#"><i class="fas fa-tasks"></i> <span> Suivi</span> <span class="menu-arrow"></span></a>
+            <ul>
+                <li>
+                    <a href="/generer_semaine"> <span>Suivi des cours</span></a>
+                    <a href="/matSuivie"> <span>Suivi des Matieres</span></a>
+                    <a href="/enregistrer_debut_semaines"> <span>Date Jour</span></a>
+                    </li>
+                  
+            
+            </ul>
             </li>
-          
+    </li>
     
     </ul>
     </li>
-
-<li class="menu-title">
-    <span>Suivi</span>
-    </li>
-</li>
-
-</ul>
-</li>
-</ul>
-</div>
-</div>
-</div>
+    </ul>
+    </div>
+    </div>
+    </div>
+    
 
 
 
@@ -555,7 +263,7 @@
           <td>{{ matiere.Nummat }}</td>
           <td>{{ matiere.Mat }}</td>
                         <td>
-                            <a href="{% url 'updatemat' matiere.Nummat %}" class="btn btn-sm bg-danger-light">
+                            <a href="{% url 'updateMat' matiere.Nummat %}" class="btn btn-sm bg-danger-light">
                                 <i class="feather-edit"></i>
                                 </a>
                                 <a href="{% url 'deletem' matiere.Nummat %}" class="btn btn-sm bg-danger-light">
