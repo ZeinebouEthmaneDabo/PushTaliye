@@ -239,8 +239,8 @@
 
     </div>
     
-        <div class="col-auto text-end float-end ms-auto download-grp">
-        <a href="#" class="btn btn-outline-primary me-2"><i class="fas fa-download"></i> Download</a>
+    <div class="col-auto text-end float-end ms-auto download-grp">
+        <a href="#" id="exportLink" class="btn btn-outline-primary me-2"><i class="fas fa-download"></i> Download</a>
         <a href="{% url 'addc' Profil.codeProfil %}" class="btn btn-primary"><i class="fas fa-plus"></i></a>
         </div>
         </div>
@@ -248,12 +248,12 @@
     
     <div class="table-responsive">
         
-        <table class="table border-0 star-student table-hover table-center mb-0 datatable table-striped" >
+        <table id="exportTable" class="table border-0 star-student table-hover table-center mb-0 datatable table-striped" >
         <thead>
             
                 </div>
                 <tr>
-                    <th>ID</th>
+            <th>ID</th>
             <th>Salle</th>
             <th>Nom prof </th>
             <th>Matiere</th>
@@ -272,13 +272,12 @@
                 <td>{{ p.Mat.Mat }}</td>
                 <td>{{ p.Cd_Horaire.HCours}}</td>
                 <td>{{ p.NumJour.NomJour}}</td>
-                <td>{{ p.idG.LibelleGroupe}}</td>
-                <td>{{ p.NatCours }}</td>
+                <td>{{ p.NatCours.type }}</td>
                         <td>
                             <a href="{% url 'updateCours' p.id %}" class="btn btn-sm bg-danger-light">
                                 <i class="feather-edit"></i>
                             </a>
-                            <a href="{% url 'deleteC' p.id %}" class="btn btn-sm bg-danger-light">
+                            <a href="{% url 'deleteC' p.id %}" onclick="return confirm('Etes vous sur ?')" class="btn btn-sm bg-danger-light" >
                                 <i class="fas fa-trash-alt"></i>
                             </a>
                         </td>
@@ -294,7 +293,10 @@
     </div>
     </div>
     </div>
-    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+
+
     <script>
 
 $(document).ready(function() {
@@ -303,6 +305,73 @@ $(document).ready(function() {
         window.location.href = filePath;
       });
     });
+  
+
+$(document).ready(function() {
+    // Gérer le clic sur le bouton "Download"
+    $('#exportLink').on('click', function(e) {
+        e.preventDefault();
+       
+        // Créer un nouveau classeur (Workbook)
+        var workbook = XLSX.utils.book_new();
+
+        // Créer une nouvelle feuille (Worksheet)
+        var worksheet = XLSX.utils.table_to_sheet(document.getElementById('exportTable'));
+
+        $(document).ready(function() {
+  // ...
+
+  // Créer une nouvelle feuille (Worksheet)
+  var worksheet = XLSX.utils.table_to_sheet(document.getElementById('exportTable'));
+
+  // Appliquer les styles de bordure et de format aux cellules
+  var borderStyle = { border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } };
+  var boldStyle = { font: { bold: true } };
+  var range = XLSX.utils.decode_range(worksheet['!ref']);
+
+  // Parcourir les cellules de la première ligne (titres)
+  for (var C = range.s.c; C <= range.e.c; ++C) {
+    var cellAddress = XLSX.utils.encode_cell({ r: range.s.r, c: C });
+    var cell = worksheet[cellAddress];
+    if (cell) {
+      cell.s = { ...borderStyle, ...boldStyle }; // Appliquer les styles de bordure et de gras
+    }
+  }
+
+  // ...
+});
+
+        // Ajouter la feuille au classeur
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+        // Convertir le classeur en binaire Excel
+        var excelBinary = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
+
+        // Convertir le binaire en blob
+        var blob = new Blob([s2ab(excelBinary)], { type: 'application/octet-stream' });
+
+        // Créer un lien de téléchargement
+        var downloadLink = document.createElement('a');
+        downloadLink.href = window.URL.createObjectURL(blob);
+        downloadLink.download = 'data.xlsx';
+        downloadLink.style.display = 'none';
+
+        // Ajouter le lien au corps du document
+        document.body.appendChild(downloadLink);
+
+        // Cliquer sur le lien de téléchargement
+        downloadLink.click();
+
+        // Supprimer le lien du corps du document
+        document.body.removeChild(downloadLink);
+    });
+});
+function s2ab(s) {
+    var buf = new ArrayBuffer(s.length);
+    var view = new Uint8Array(buf);
+    for (var i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+    return buf;
+}
 
     </script>
 

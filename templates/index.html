@@ -88,6 +88,24 @@
 
 
 <ul class="nav user-menu">
+
+    
+
+        <li class="nav-item dropdown language-drop me-2">
+            <a href="#" class="dropdown-toggle nav-link header-nav-list" data-bs-toggle="dropdown">
+            <img src="{% static 'assets/img/para.jpg' %}" alt="">
+            </a>
+            <div class="dropdown-menu">
+            
+                
+                <a  href="/enregistrer_debut_semaines" class="dropdown-item" ><i class=""></i>Date Jour</a>
+                <a  href="/pageincrementAnnees" class="dropdown-item" ><i class=""></i> L'annees</a>
+            
+            </div>
+            </li>
+    
+
+
 <li class="nav-item dropdown language-drop me-2">
 <a href="#" class="dropdown-toggle nav-link header-nav-list" data-bs-toggle="dropdown">
 <img src="{% static 'assets/img/france.png' %}" alt="">
@@ -98,6 +116,8 @@
 
 </div>
 </li>
+
+
 
 
 
@@ -180,8 +200,8 @@
                     <a href="#"><i class="fas fa-calendar-alt"></i> <span>Emplois</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="/ListeEmplois">Emplois cours</a></li>
-                        <li><a href="/"> Emplois Professeurs</a></li>
-                        <li><a href="/"> Emplois salles</a></li>
+                        <li><a href="/ListeEmpProfs"> Emplois Professeurs</a></li>
+                        <li><a href="/ListeEmpSalles"> Emplois salles</a></li>
                     </ul>
                 </li>
                 <li class="menu-title">
@@ -198,7 +218,6 @@
             <li>
                 <a href="/generer_semaine"> <span>Suivi des cours</span></a>
                 <a href="/matSuivie"> <span>Suivi des Matieres</span></a>
-                <a href="/enregistrer_debut_semaines"> <span>Date Jour</span></a>
                 </li>
               
         

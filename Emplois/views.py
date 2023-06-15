@@ -182,12 +182,6 @@ def salle_list_pdf(request):
 
 
 
-
-
-
-
-
-
 @login_required
 @cache_control(no_cache=True, must_revalidate=True,no_store=True)
 
@@ -269,12 +263,6 @@ def index(request):
     countd = DEPART.objects.count()
     countf = Profil.objects.count()
     return render(request, 'index.html', {'count': count, 'countp': countp, 'countd': countd, 'countf': countf })
-
-
-
-
-
-
 
 
 
@@ -361,20 +349,28 @@ def deleteF(request, codeF):
 
 
 def homeF(request):
+    codeProfil = request.GET.get('codeProfil', '')
+    LibelleProfil = request.GET.get('LibelleProfil', '')
+    Niv = request.GET.get('Niv', '')
+    NbEtudlns = request.GET.get('NbEtudlns', '')
+
+    queryset = Profil.objects.all()
+
+    if codeProfil:
+        queryset = queryset.filter(codeProfil__icontains=codeProfil)
+    if LibelleProfil:
+        queryset = queryset.filter(LibelleProfil__icontains=LibelleProfil)
+    if Niv:
+        queryset = queryset.filter(Niv__Noniv__icontains=Niv)
+    if NbEtudlns:
+        queryset = queryset.filter(NbEtudlns__icontains=NbEtudlns)
+
     niveaux = Niveau.objects.all()
 
-    if "q" in request.GET:
-        niveau_id = request.GET["q"]
-        if niveau_id:
-            pr = Profil.objects.filter(Niv_id=niveau_id)
-        else:
-            pr = Profil.objects.all()
-    else:
-        pr = Profil.objects.all()
-
-    context = {"profil": pr, "niveaux": niveaux}
+    context = {"profil": queryset, "niveaux": niveaux}
 
     return render(request, "filiere.html", context)
+
 
 
 def liste_paginee(request):
@@ -552,13 +548,15 @@ def updateMat(request,Nummat):
 
 
 def deletem(request, nummat):
+   
     prof = Matieres.objects.get(Nummat=nummat)
+    filiere_id = prof.Noprfl.codeProfil 
     prof.delete()
-    return redirect("/filiere")
+    return redirect("/Listematiers/{0}".format(filiere_id))
 
 
 
-def emp(request):
+def emp(request): 
     return render(request, 'affEmp.html')
 
 def addc(request, filiere_id):
@@ -573,13 +571,14 @@ def addc(request, filiere_id):
             matricule = form.cleaned_data.get("Matricule")
             cd_horaire = form.cleaned_data.get("Cd_Horaire")
             num_jour = form.cleaned_data.get("NumJour")
+            
             salle = form.cleaned_data.get("salle")
 
             existing_cours_prof = EmploisCours.objects.filter(
                 Matricule=matricule, Cd_Horaire=cd_horaire, NumJour=num_jour
             ).exists()
 
-            if existing_cours_prof:
+            if existing_cours_prof:   
                 form.add_error(
                     None, "Ce professeur occupe déjà un cours à cette heure."
                 )
@@ -605,14 +604,16 @@ def addc(request, filiere_id):
                 return render(request, "addc.html", context=context, status=400)
 
             cours.save()
-            return redirect("/filiere")
+            return redirect("/affichCours/{0}".format(filiere_id)) 
 
     else:
         form.fields["Mat"].queryset = Matieres.objects.filter(Noprfl_id=filiere_id)
 
     context = {
         "form": form,
-    }
+        "filiere_id": filiere_id,
+}
+    
 
     # Mettre à jour les options de sélection des salles et des professeurs
     if request.method == "POST" and form.is_valid():
@@ -626,33 +627,61 @@ def addc(request, filiere_id):
         professeurs_occupees = EmploisCours.objects.filter(
             Cd_Horaire=cd_horaire, NumJour=num_jour
         ).values_list('Matricule', flat=True)
-
+        occupied_hours = EmploisCours.objects.filter(
+           NumJour=num_jour,
+            NOPRFL_id=profile,  # Ajoutez le filtrage par filière
+       ).values_list('Cd_Horaire', flat=True)
+        form.fields["Cd_Horaire"].queryset = Horaire.objects.exclude(id__in=occupied_hours)
         form.fields["salle"].queryset = Salles.objects.exclude(id__in=salles_occupees)
         form.fields["Matricule"].queryset = Professeurs.objects.exclude(Matricule__in=professeurs_occupees)
         form.fields["salle"].queryset = Salles.objects.all()  # Liste complète des salles
         form.fields["Matricule"].queryset = Professeurs.objects.all()  # Liste complète des professeurs
 
     return render(request, "addc.html", context=context)
-def occupancy_api(request):
-    selected_horaire = request.GET.get('horaire')
+from django.http import JsonResponse
+
+def occupancyHeures_api(request):
     selected_jour = request.GET.get('jour')
+    filiere_id = request.GET.get('filiere_id')
 
-    occupied_salles = EmploisCours.objects.filter(
-        Cd_Horaire=selected_horaire,
-        NumJour=selected_jour
-    ).values_list('salle', flat=True)
+    occupied_hours = EmploisCours.objects.filter(
+        NumJour=selected_jour, NOPRFL_id=filiere_id
+    ).values_list('Cd_Horaire', flat=True)
 
-    occupied_professeurs = EmploisCours.objects.filter(
-        Cd_Horaire=selected_horaire,
-        NumJour=selected_jour
-    ).values_list('Matricule', flat=True)
+    available_hours = Horaire.objects.exclude(cd__in=occupied_hours)
 
     data = {
-        'occupied_salles': list(occupied_salles),
-        'occupied_professeurs': list(occupied_professeurs),
+        'available_hours': list(available_hours.values_list('cd', flat=True)),
     }
 
     return JsonResponse(data)
+
+
+def occupancy_api(request):
+    selected_jour = request.GET.get('jour')
+    
+    selected_horaire = request.GET.get('horaire')
+
+        # Récupération des salles et des professeurs occupés pour l'horaire et le jour spécifiés
+    occupied_salles = EmploisCours.objects.filter(
+            Cd_Horaire=selected_horaire,
+            NumJour=selected_jour
+        ).values_list('salle', flat=True)
+
+    occupied_professeurs = EmploisCours.objects.filter(
+            Cd_Horaire=selected_horaire,
+            NumJour=selected_jour
+        ).values_list('Matricule', flat=True)
+
+    data = {
+            'occupied_salles': list(occupied_salles),
+            'occupied_professeurs': list(occupied_professeurs),
+        }
+
+    return JsonResponse(data)
+
+
+
 
 def homeC(request, filiere_id):
     filiere = get_object_or_404(Profil, codeProfil=filiere_id)
@@ -662,28 +691,6 @@ def homeC(request, filiere_id):
 
 
 from django.http import JsonResponse
-
-# def get_available_data(request):
-#     cd_horaire = request.GET.get('cd_horaire')
-#     num_jour = request.GET.get('num_jour')
-
-#     salles_occupees = EmploisCours.objects.filter(
-#         Cd_Horaire=cd_horaire, NumJour=num_jour
-#     ).values_list('salle', flat=True)
-
-#     professeurs_occupees = EmploisCours.objects.filter(
-#         Cd_Horaire=cd_horaire, NumJour=num_jour
-#     ).values_list('Matricule', flat=True)
-
-#     salles_disponibles = Salles.objects.exclude(id__in=salles_occupees).values()
-#     professeurs_disponibles = Professeurs.objects.exclude(Matricule__in=professeurs_occupees).values()
-
-#     data = {
-#         'salles': list(salles_disponibles),
-#         'professeurs': list(professeurs_disponibles),
-#     }
-
-#     return JsonResponse(data)
 
 
 def updateCours(request, id):
@@ -703,10 +710,12 @@ def updateCours(request, id):
 
 
 # delete cour
+
 def deleteC(request, id):
     prof = EmploisCours.objects.get(id=id)
+    filiere_id = prof.NOPRFL.codeProfil  # Récupérer l'ID de la filière
     prof.delete()
-    return redirect("/cours")
+    return redirect("/affichCours/{0}".format(filiere_id))  # Redirection vers la page des cours avec l'ID de la filière
 
 
 
@@ -747,8 +756,85 @@ def Emplois(request, code_profil):
     return render(request, 'Emplois.html', context)
 
 
+def EmploisSalles(request,salle):
+    # Récupérer l'année en cours
+    annee_en_cours = AnneeEnCours.objects.first()
+    annee = annee_en_cours.annee if annee_en_cours else date.today().year
 
+    # Calculer l'année précédente
+    annee_precedente = annee - 1
 
+    # Récupérer le profil correspondant
+    salle = Salles.objects.get(NomSalles=int(salle))
+    jours = Jours.objects.all()
+    heures = Horaire.objects.all()
+
+    c_j_h = []
+    cours = EmploisCours.objects.filter(salle=salle)
+    for cours_item in cours:
+        if cours_item.Cd_Horaire in heures and cours_item.NumJour in jours:
+            c_j_h.append((cours_item.Mat, cours_item.NumJour, cours_item.Cd_Horaire, cours_item.Matricule, cours_item.NOPRFL))
+
+    context = {
+        'c_j_h': c_j_h,
+        'jours': jours,
+        'heures': heures,
+        'Salles': salle,
+        'annee_en_cours': annee,
+        'annee_precedente': annee_precedente
+    }
+    return render(request, 'EmploisSalle.html', context)
+
+def EmploisProf(request,nni):
+    # Récupérer l'année en cours
+    annee_en_cours = AnneeEnCours.objects.first()
+    annee = annee_en_cours.annee if annee_en_cours else date.today().year
+
+    # Calculer l'année précédente
+    annee_precedente = annee - 1
+
+    # Récupérer le profil correspondant
+    prof =Professeurs.objects.get(NNI=nni)
+    jours = Jours.objects.all()
+    heures = Horaire.objects.all()
+
+    c_j_h = []
+    cours = EmploisCours.objects.filter(Matricule=prof)
+    for cours_item in cours:
+        if cours_item.Cd_Horaire in heures and cours_item.NumJour in jours:
+            c_j_h.append((cours_item.Mat, cours_item.NumJour, cours_item.Cd_Horaire, cours_item.salle, cours_item.NOPRFL))
+
+    context = {
+        'c_j_h': c_j_h,
+        'jours': jours,
+        'heures': heures,
+        'Profs': prof,
+        'annee_en_cours': annee,
+        'annee_precedente': annee_precedente
+    }
+    return render(request, 'EmploisProf.html', context)
+
+def ListeEmpProfs(request):
+    # Passer les données à la template
+    profs=Professeurs.objects.all()
+
+    context = {
+        "Profs": profs,
+    }
+
+    # Rendre la template pour afficher les emplois de la filière
+    return render(request, "ListeEmpProfs.html", context) 
+
+def ListeEmpSalles(request):
+    # Passer les données à la template
+    salles=Salles.objects.all()
+
+    context = {
+        "Salles": salles,
+    }
+
+    # Rendre la template pour afficher les emplois de la filière
+    return render(request, "ListeEmpSalles.html", context) 
 
 from django.contrib.auth.models import User
 
@@ -949,11 +1035,36 @@ from django.urls import reverse
 from bs4 import BeautifulSoup
 from xhtml2pdf import pisa
 from .models import Profil, Jours, Horaire, EmploisCours
+from io import BytesIO
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+from bs4 import BeautifulSoup
+
+from io import BytesIO
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+from bs4 import BeautifulSoup
+
+
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from reportlab.pdfgen import canvas
+from io import BytesIO
+from bs4 import BeautifulSoup
+
 
 def export_to_pdfCollectif(request):
     code_filieres = request.POST.getlist('filieres')  # Récupérer la liste des codes de filières depuis la requête POST
 
-    pdfs = []
+    # Créer un buffer pour le PDF collectif
+    buffer = BytesIO()
+
+    # Créer le document PDF collectif
+    pdf = canvas.Canvas(buffer)
+
+    # Parcourir les codes de filières
     for code_filiere in code_filieres:
         profil = get_object_or_404(Profil, codeProfil=code_filiere)
         jours = Jours.objects.all()
@@ -985,70 +1096,26 @@ def export_to_pdfCollectif(request):
         # Extract the desired <div> content
         soup = BeautifulSoup(html, "html.parser")
         div_content = soup.find("div", class_="row").prettify()
-        style = """
-            <style>
-                @import url('https://fonts.googleapis.com/css2?family=Amiri&display=swap');
 
-                .arabic {
-                    font-family: 'Amiri', Arial, sans-serif;
-                    direction: rtl;
-                    text-align: right;
-                }
+        # Dessiner le contenu de chaque filière sur le document PDF collectif
+        pdf.drawString(100, 700, f"Emplois - Filière: {code_filiere}")
+        pdf.setFont("Helvetica", 12)
+        pdf.drawString(100, 650, div_content)
+        pdf.showPage()
 
-                p {
-                    font-family: Arial, sans-serif;
-                    text-align: center;
-                }
+    # Finaliser le document PDF collectif
+    pdf.save()
 
-                h1 {
-                    color: #333;
-                }
+    # Obtenir le contenu du PDF à partir du buffer
+    pdf_content = buffer.getvalue()
 
-                table {
-                    border-collapse: collapse;
-                    width: 100%;
-                }
+    # Fermer le buffer
+    buffer.close()
 
-                th, td {
-                    border: 1px solid #ccc;
-                    padding: 8px;
-                    text-align: center;
-                }
-                 #pf{
-  position: absolute;
-  top: 10px;
-  left: 10px;
-    }
-
-    #pd{
-  position: absolute;
-  top: 10px;
-  right:10px;
-    }
-
-            </style>
-        """
-
-        # Ajouter les liens vers les feuilles de style CSS avant le contenu de la <div>
-        div_content = style + div_content
-
-        # Génération du PDF à partir du contenu HTML
-        pdf = pisa.CreatePDF(div_content, encoding="utf-8")
-
-        if not pdf.err:
-            pdfs.append((pdf, code_filiere))
-
-    # Créer un fichier ZIP contenant tous les fichiers PDF générés
-    zip_file = BytesIO()
-    with zipfile.ZipFile(zip_file, "w") as zf:
-        for pdf, code_filiere in pdfs:
-            pdf_file_name = f"emplois_{code_filiere}.pdf"
-            zf.writestr(pdf_file_name, pdf.dest.getvalue())
-
-    # Retourner la réponse HTTP avec le fichier ZIP contenant les PDFs
-    response = HttpResponse(content_type="application/zip")
-    response["Content-Disposition"] = 'attachment; filename="emplois_collectifs.zip"'
-    response.write(zip_file.getvalue())
+    # Retourner la réponse HTTP avec le PDF collectif
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="emplois_collectifs.pdf"'
+    response.write(pdf_content)
     return response
 
 
@@ -1289,22 +1356,23 @@ def remplir_cours(request, semaine_id, jour_id):
 
 
 import json
+import json
 
 def enregistrer_cours(request):
     if request.method == 'POST':
         cours_data = json.loads(request.POST.get('coursData'))
-        
-    for cours in cours_data:
-        try:
-            cours_obj = Cours.objects.get(ID=cours['id'])
-            cours_obj.vl = cours['vl']
-            cours_obj.save()
-        except Cours.DoesNotExist:
-        # Gérer le cas où aucun objet Cours correspondant à l'ID n'est trouvé
-            pass
+
+        for cours in cours_data:
+            try:
+                cours_obj = Cours.objects.get(ID=cours['id'])
+                cours_obj.vl = cours['vl']
+                cours_obj.save()
+            except Cours.DoesNotExist:
+                # Gérer le cas où aucun objet Cours correspondant à l'ID n'est trouvé
+                pass
 
         return HttpResponse('Les cours ont été enregistrés avec succès !')
-   
+
 
 from django.shortcuts import render
 from .models import Matieres, Cours
@@ -1349,3 +1417,52 @@ def matSuivie(request):
     }
 
     return render(request, 'Suivie_matieres.html', context)
+
+from django.shortcuts import render
+from .models import AnneeEnCours
+
+def pageincrementAnnees(request):
+    annee_obj = AnneeEnCours.objects.first()
+    context = {'current_year': annee_obj.annee if annee_obj else None}
+    return render(request, 'IncrementAnnees.html', context)
+
+
+
+from .models import AnneeEnCours
+
+from django.http import JsonResponse
+# 4i mavatt sel7tt
+from django.shortcuts import render
+from django.views import View
+from .models import AnneeEnCours
+
+from django.http import JsonResponse
+
+from django.shortcuts import render, redirect
+from django.views import View
+from .models import AnneeEnCours, EmploisCours
+
+class IncrementAnneeView(View):
+    def get(self, request):
+        # Récupérer l'année en cours
+        annee_en_cours = AnneeEnCours.objects.first()
+        
+        if annee_en_cours:
+            # Incrémenter l'année en cours
+            nouvelle_annee = annee_en_cours.annee + 1
+        else:
+            # Si aucune année en cours n'existe, commencer à partir de 1
+            nouvelle_annee = 1
+        
+        # Créer un nouvel objet AnneeEnCours avec la nouvelle année
+        AnneeEnCours.objects.create(annee=nouvelle_annee)
+        
+        # Mettre à jour la valeur de l'année pour tous les enregistrements de EmploisCours
+        emplois_cours = EmploisCours.objects.all()
+        emplois_cours.update(annee=nouvelle_annee)
+        
+        # Rediriger vers une page de confirmation ou une autre vue
+        return redirect('confirmation')
+
+
+

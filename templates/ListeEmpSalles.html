@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 
 {% load static %}
@@ -8,7 +6,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-<title>ISCAEMP - ISCAE</title>
+<title>Isca - Emp</title>
 
 <link rel="shortcut icon" href="{% static 'assets/img/favicon.png' %}">
 
@@ -26,16 +24,31 @@
 <link rel="stylesheet" href="{% static 'assets/plugins/select2/css/select2.min.css' %}">
 
 <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+<style>
+    .filiere-list {
+    list-style: none;
+    padding: 0;
+}
 
- 
+.filiere-item {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f5f5f5;
+}
 
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+.filiere-item a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    display: block;
+    padding: 10px;
+}
 
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
-
-<!-- Fichier JavaScript -->
 
 
+</style>
 </head>
 <body>
 
@@ -193,118 +206,109 @@
 
 
 
-
-
 <div class="page-wrapper">
-    <div class="content container-fluid">
-    
-    <div class="page-header">
-    <div class="row align-items-center">
-    <div class="col">
-    <h3 class="page-title">matières</h3>
-    <ul class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/salle">matières</a></li>
-    <li class="breadcrumb-item active">Liste des matières</li>
-    </ul>
-    </div>
-    </div>
-    </div>
-  <form>
-    <div class="student-group-form">
-    <div class="row">
-    <div class="col-lg-3 col-md-6">
-    <div class="form-group">
-    <input type="text" name="q" class="form-control" placeholder=" ">
-    </div>
-    </div>
-    
+<div class="content container-fluid">
 
-    <div class="col-lg-2">
-    <div class="search-student-btn">
-    <button type="submit" class="btn btn-primary">Rechercher</button>
-    </div>
-    </div>
-    </div>
-    </div>
-  </form>
-    <div class="row">
-    <div class="col-sm-12">
-    <div class="card card-table">
-    <div class="card-body">
+<div class="page-header">
+<div class="row align-items-center">
+<div class="col">
 
-    
-    <div class="page-header">
-    <div class="row align-items-center">
-    <div class="col">
-        <h3>Liste des matières pour la filière "{{ Profil.LibelleProfil }}"</h3>
-    </div>
-    <div class="col-auto text-end float-end ms-auto download-grp">
-    <a href="#" class="btn btn-outline-primary me-2"><i class="fas fa-download"></i> Download</a>
-    <a href="{% url 'addM' Profil.codeProfil %}" class="btn btn-primary"><i class="fas fa-plus"></i></a>
-    </div>
-    </div>
-    </div>
-    
-    <div class="table-responsive">
-        {% block content %}   
-        <table class="table border-0 star-student table-hover table-center mb-0 datatable table-striped" >
-        <thead>
-            
-                </div>
-                <tr>
-                    <th>Nummat</th>
-                    <th>Nom</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for matiere in Matieres %}
-        <tr>
-          <td>{{ matiere.Nummat }}</td>
-          <td>{{ matiere.Mat }}</td>
-                        <td>
-                            <a href="{% url 'updateMat' matiere.Nummat %}" class="btn btn-sm bg-danger-light">
-                                <i class="feather-edit"></i>
-                                </a>
-                                <a href="{% url 'deletem' matiere.Nummat %}" onclick="return confirm('Etes vous sur ?')" class="btn btn-sm bg-danger-light" >
-                                    <i class="fas fa-trash-alt"></i>
-                                  
-                                    </a>
-                            
-                        </td>
-                    </tr>
+
+</div>
+</div>
+</div>
+
+<form method="post" action="{% url 'export_to_pdfCollectif' %}">
+{% csrf_token %}
+<div class="row">
+<div class="col-sm-12">
+    <div class="card">
+        <div class="card-body">
+            <h1 style="text-align: center;">Liste des Emplois</h1>
+            <div style="text-align: center;">
+                <input type="checkbox" id="select-all" />
+                <label for="select-all">Select All</label>
+            </div>
+            <ul class="filiere-list" style="list-style-type: none; padding-left: 0;">
+                {% for salle in Salles %}
+                <li style="margin-bottom: 10px;">
+                    <div class="card p-3">
+                        <div class="filiere-item d-flex align-items-center">
+                            <input type="checkbox" class="filiere-checkbox" name="filieres" value="{{ filiere.codeProfil }}" />
+                            <a href="{% url 'EmploisSalles' salle=salle.NomSalles %}" style="margin-left: 10px; text-decoration: none;">{{ salle.NomSalles }}</a>
+                        </div>
+                    </div>
+                </li>
                 {% endfor %}
-            </tbody>
-            
-        </table>
+            </ul>
+        </div>
+    </div>
+</div>
+</div>
+<button type="submit" style="display: block; margin: 20px auto;" class="btn btn-primary">Export to PDF</button>
+</form>
+
+
+
+
+ <div class="row">
+            {% for user in users %}
+            <div class="col-xl-3 col-sm-6 col-12 d-flex">
+                <div class="card bg-comman w-100">
+                    <div class="card-body">
+                        <div class="db-widgets d-flex justify-content-between align-items-center">
+                            <div class="db-info">
+                                <a href="/Listeprof"> <h6>Responsable :</h6></a>
+                                <h5>{{ user.username }}</h5>
+                                <p></p>
+                                <p><a href="{% url 'delete_username' user.username %}" class="btn btn-sm bg-danger-light" onclick="return confirm('Etes vous sur ?')">
+                                    <i class="fas fa-trash-alt"></i>
+                                    </a></p>
+                            </div>
+                            <div class="db-icon">
+                                <a href=""> <img class="" src="{% static 'assets/img/respo.png' %}" alt=""></a>
+                            </div>
+                        </div>  
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
         
-        {% endblock %}
-        
-    </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    
-    
+
+<script>
+    // Sélection de toutes les filières
+    const selectAllCheckbox = document.getElementById('select-all');
+    const filiereCheckboxes = document.getElementsByClassName('filiere-checkbox');
+
+    selectAllCheckbox.addEventListener('change', function() {
+        for (let checkbox of filiereCheckboxes) {
+            checkbox.checked = this.checked;
+        }
+    });
+
+    // Gestion de la sélection/désélection des filières individuelles
+    for (let checkbox of filiereCheckboxes) {
+        checkbox.addEventListener('change', function() {
+            // Vérifier si toutes les filières sont sélectionnées pour cocher/décocher la case "Select All"
+            const allSelected = [...filiereCheckboxes].every(checkbox => checkbox.checked);
+            selectAllCheckbox.checked = allSelected;
+        });
+    }
+</script>
 
 
 
-    <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
 
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-   
-   <script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-   
-   <script src="{% static 'assets/js/feather.min.js' %}"></script>
-   
-   <script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
-   
-   <script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
-   
-   <script src="{% static 'assets/js/script.js' %}"></script>
+<script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
+<script src="{% static 'assets/js/feather.min.js' %}"></script>
 
+<script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+
+<script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
+
+<script src="{% static 'assets/js/script.js' %}"></script>
 </body>
 </html>

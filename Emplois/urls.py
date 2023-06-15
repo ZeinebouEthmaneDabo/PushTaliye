@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import IncrementAnneeView
 
 urlpatterns = [
     
@@ -22,6 +23,11 @@ urlpatterns = [
     path('filiere', views.homeF, name='filiere'),
     path('ListeEmplois', views.ListeEmplois, name='ListeEmplois'),
     path('Emplois/<slug:code_profil>', views.Emplois, name='Emplois'),
+    path('EmploisSalles/<slug:salle>', views.EmploisSalles, name='EmploisSalles'),
+    path('ListeEmpSalles', views.ListeEmpSalles, name='ListeEmpSalles'),
+    path('ListeEmpProfs', views.ListeEmpProfs, name='ListeEmpProfs'),
+    path('EmploisProf/<slug:nni>', views.EmploisProf, name='EmploisProf'),
+  
     path('affemp', views.emp, name='affEmp'),
     path("affichCours/<slug:filiere_id>", views.homeC, name="Cours"),
     path("cours/<slug:filiere_id>", views.addc, name="addc"), 
@@ -41,6 +47,7 @@ urlpatterns = [
     path('export_to_pdf/<slug:code_profil>', views.export_to_pdf, name='export_to_pdf'),
     path('export_to_pdfCollectif', views.export_to_pdfCollectif, name='export_to_pdfCollectif'),
     path('get_salles/', views.get_salles, name='get_salles'),
+    path('api/occupancyHeures/', views.occupancyHeures_api, name='occupancyHeures'),
     path('api/occupancy/', views.occupancy_api, name='occupancy_api'),
     path('enregistrer_debut_semaines/', views.enregistrer_debut_semaines, name='enregistrer_debut_semaines'),
     path('generer_semaine/', views.generer_semaine, name='generer_semaine'),
@@ -49,7 +56,7 @@ urlpatterns = [
     path('remplir_cours/<int:semaine_id>/<int:jour_id>/', views.remplir_cours, name='remplir_cours'),
     path('enregistrer_cours/', views.enregistrer_cours, name='enregistrer_cours'),
     path('afficher_cours_semaine/', views.affichCoursSemaine, name='affichCoursSemaine'),
-
-]   
+    path('pageincrementAnnees/', views.pageincrementAnnees, name='pageincrementAnnees'),
+    path('increment_annee/', IncrementAnneeView.as_view(), name='increment_annee'),]   
    
 

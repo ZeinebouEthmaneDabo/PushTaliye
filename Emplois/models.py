@@ -1,3 +1,4 @@
+from datetime import timezone
 from django.db import models
 
 # from Emplois.models import Jours
@@ -129,16 +130,8 @@ def _str_(self):
     return f"({self.type})"
 
 class AnneeEnCours(models.Model):
-    annee = models.IntegerField(default=2023)  # Valeur initiale de l'année
+    annee = models.IntegerField(default=2023)
 
-    @staticmethod
-    def increment_annee():
-        annee_obj = AnneeEnCours.objects.first()
-        if annee_obj:
-            annee_obj.annee += 1
-            annee_obj.save()
-        else:
-            AnneeEnCours.objects.create(annee=2023)  # Crée un nouvel objet si aucun n'existe
 
 
 class EmploisCours(models.Model):
@@ -150,9 +143,17 @@ class EmploisCours(models.Model):
     salle = models.ForeignKey(Salles, on_delete=models.CASCADE)
     NumJour = models.ForeignKey(Jours, on_delete=models.CASCADE)
     NatCours = models.ForeignKey(typeCours, on_delete=models.CASCADE)
-    annee = models.ForeignKey(AnneeEnCours, on_delete=models.CASCADE, default=2023)  # Lien avec le modèle AnneeEnCours
-  
+    annee = models.ForeignKey(AnneeEnCours, on_delete=models.CASCADE,default=2023)  
+    # Lien avec le modèle AnneeEnCours
+    def get_annee_en_cours(self):
+        return AnneeEnCours.objects.first()
 
+    def Savee(self, *args, **kwargs):
+        if not self.annee:
+            annee_en_cours = self.get_annee_en_cours()
+            if annee_en_cours:
+                self.annee = annee_en_cours
+        super().save(*args, **kwargs)
 
 class Pgmemptemps(models.Model):
     Noprfl = models.ForeignKey(Profil, on_delete=models.CASCADE)
@@ -214,7 +215,7 @@ class Cours(models.Model):
     vl=models.BooleanField(default=False)
     NumJour=models.ForeignKey(Jours, on_delete=models.CASCADE)
     natcours=models.ForeignKey(typeCours, on_delete=models.CASCADE)
-    annee = models.ForeignKey(AnneeEnCours, on_delete=models.CASCADE, default=2023) 
+    annee = models.ForeignKey(AnneeEnCours, on_delete=models.CASCADE,default=2023) 
 
 
     

@@ -267,9 +267,9 @@
                 <img src="{% static 'assets/img/logo-iscae2.png' %}">
                 <p class="arabic">Annees universitaire: {{ annee_en_cours }} - {{ annee_precedente }} :السنة الدراسية</p>
                 <p class="arabic"><b>Emplois du Temps الجدول الزمني</b></p>
-                <p class="arabic">Filiere: {{ profil.LibelleProfil }} :الشعبة</p>
+                <p class="arabic"> salle:{{ Salles.NomSalles }}:القسم</p>
               </div>
-      
+            
               <table>
                 <tr>
                   <th>Heures/Jours</th>
@@ -282,11 +282,12 @@
                   <td>{{ heure.HCours }}</td>
                   {% for jour in jours %}
                   <td>
-                    {% for cour, num_jour, horaire, matricule, salle in c_j_h %}
+                    {% for cour, num_jour, horaire, matricule, NOPRFL in c_j_h %}
                     {% if num_jour == jour and horaire == heure %}
+                    <p> {{ NOPRFL.LibelleProfil }}</p>
                     <p>{{ cour.Mat }}</p>
                     <p>{{ matricule.Nom }}</p>
-                    <p>salle: {{ salle.NomSalles }}</p>
+                 
                     {% endif %}
                     {% endfor %}
                   </td>
@@ -300,13 +301,6 @@
       </div>
       
       
-      <form method="post" action="{% url 'export_to_pdf' code_profil=profil.codeProfil %}">
-        
-        {% csrf_token %}
-        <!-- Reste du formulaire -->
-        <button type="submit">Exporter en PDF</button>
-      </form>
-          
         
         
            

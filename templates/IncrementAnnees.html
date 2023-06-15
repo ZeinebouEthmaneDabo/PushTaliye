@@ -197,193 +197,16 @@
   
 
 
+      <h1>Incrémenter l'année en cours</h1>
+      
+      <form method="GET" action="{% url 'increment_annee' %}">
+          {% csrf_token %}
+          <input type="submit" value="Incrémenter">
+      </form>
 
-<div class="page-wrapper">
-    <div class="content container-fluid">
-    
-    <div class="page-header">
-    <div class="row align-items-center">
-    <div class="col">
-    <h3 class="page-title"></h3>
-    <ul class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/Listeprof">Retour au liste</a></li>
-
-    </ul>
-    </div>
-    </div>
-    </div>
-    
-    <div class="row">
-      <div class="col-sm-12">
-        <div class="card">
-          <div class="card-body">
-            {% if form.errors %}
-            <div class="error-message">
-              {% for field_name, field_errors in form.errors.items %}
-                {% for error in field_errors %}
-                  <p style="color:red">{{error}}</p>
-                {% endfor %}
-              {% endfor %}
-            </div>
-          {% endif %}
-         
-            <form method="post" class="form-inline">
-              {% csrf_token %}
-              <input type ="text" id="filiere_id" name="filiere_id" value="{{ filiere_id }}">
-    
-              <div class="form-group mr-sm-2">
-                <label for="{{ form.id.id_for_label }}"><span class="login-danger">*</span>ID</label>
-                {{ form.id }}
-              </div>
-            
-              <div class="form-group mr-sm-2">
-                <label for="{{ form.Mat.id_for_label }}"><span class="login-danger">*</span>Matieres</label>
-                {{ form.Mat}}
-              </div>
-              <div class="form-group mr-sm-2">
-                <label for="{{ form.NumJour.id_for_label }}"><span class="login-danger">*</span>Jour</label>
-                {{ form.NumJour}}
-              </div>
-              <div class="form-group mr-sm-2">
-                <label for="{{ form.Cd_Horaire.id_for_label }}"><span class="login-danger">*</span>Horaire</label>
-                {{ form.Cd_Horaire }}
-              </div>
-              <div class="form-group mr-sm-2">
-                <label for="{{ form.salle.id_for_label }}"><span class="login-danger">*</span>Salle</label>
-                {{ form.salle }}
-               
-              </div>
-              
-    
-              <div class="form-group mr-sm-2">
-                <label for="{{ form.Matricule.id_for_label }}"><span class="login-danger">*</span>Professeurs</label>
-                {{ form.Matricule }}
-              </div>
-              <div class="form-group mr-sm-2">
-                <label for="{{ form.NatCours.id_for_label }}"><span class="login-danger">*</span>NatureCours</label>
-                {{ form.NatCours}}
-              </div>
-            
-              <button type="submit" class="btn btn-primary">Ajouter</button>
-    
-        </div>
-        </div>
-       </form>
-    
-    </div>
-    </div>
-    </div>
-    </div>
-    <script>
-      $(document).ready(function() {
-        // Récupérer les références des éléments de sélection
-        var salleSelect = $('#id_salle');
-        var professeurSelect = $('#id_Matricule');
-    
-    
-        // Copier les options initiales pour une réinitialisation
-        var initialSalleOptions = salleSelect.html();
-        var initialProfesseurOptions = professeurSelect.html();
-    
-        // Fonction de mise à jour des options de sélection en fonction des sélections de l'utilisateur
-        function updateSelectionOptions() {
-      var selectedHoraire = $('#id_Cd_Horaire').val();
-      var selectedJour = $('#id_NumJour').val();
-    
-      // Réinitialiser les options de sélection
-      salleSelect.html(initialSalleOptions);
-      professeurSelect.html(initialProfesseurOptions);
-    
-      // Effectuer une requête AJAX pour obtenir les données d'occupation
-      $.ajax({
-        url: '/api/occupancy/',
-        data: {
-          horaire: selectedHoraire,
-          jour: selectedJour,
-        },
-        dataType: 'json',
-        success: function(data) {
-          // Filtrer les options en fonction des données d'occupation
-          salleSelect.find('option').each(function() {
-            var salleId = $(this).val();
-            var isOccupied = data.occupied_salles.includes(salleId);
-    
-            if (isOccupied) {
-              $(this).remove();
-            }
-          });
-    
-          professeurSelect.find('option').each(function() {
-            var professeurId = $(this).val();
-            var isOccupied = data.occupied_professeurs.includes(professeurId);
-    
-            if (isOccupied) {
-              $(this).remove();
-            }
-          });
-        },
-        error: function() {
-          // Gérer les erreurs de requête AJAX
-        }
-      });
-    }
-    
-    
-        // Appeler la fonction de mise à jour lorsqu'une sélection change
-        $('#id_Cd_Horaire, #id_NumJour').on('change', updateSelectionOptions);
-      });
-  $(document).ready(function() {
-    // Récupérer les références des éléments de sélection
-    var selectedHoraire = $('#id_Cd_Horaire');
-
-    // Copier les options initiales pour une réinitialisation
-    var initialHoraireOptions = selectedHoraire.html();
-
-    // Fonction de mise à jour des options de sélection en fonction des sélections de l'utilisateur
-    function updateHoraireOptions() {
-      var selectedFiliere = $('#filiere_id').val();
-      var selectedJour = $('#id_NumJour').val();
-
-      // Réinitialiser les options de sélection
-      selectedHoraire.html(initialHoraireOptions);
-
-      // Effectuer une requête AJAX pour obtenir les données d'occupation
-      $.ajax({
-        url: '/api/occupancyHeures/',
-        data: {
-          filiere_id: selectedFiliere,
-          jour: selectedJour,
-        },
-        dataType: 'json',
-        success: function(data) {
-          // Filtrer les options en fonction des données d'occupation
-          selectedHoraire.find('option').each(function() {
-            var Horaireid = $(this).val();
-            var isOccupied = data.available_hours.includes(Horaireid);
-
-            if (!isOccupied) {
-              $(this).remove();
-            }
-          });
-        },
-        error: function() {
-          // Gérer les erreurs de requête AJAX
-        }
-      });
-    }
-
-    // Appeler la fonction de mise à jour lorsqu'une sélection change
-    $('#id_NumJour, #filiere_id').on('change', updateHoraireOptions);
-  });
-
-</script>
-
-
-
-    
   
 
-<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+
 
 <script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
@@ -396,7 +219,5 @@
 <script src="{% static 'assets/js/script.js' %}"></script>
 </body>
 </html>
-
-
 
 

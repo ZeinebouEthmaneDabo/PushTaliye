@@ -13,7 +13,7 @@ class matForm(forms.ModelForm):
                                     widget=forms.Select(attrs={'class': 'form-control'}))
     Nummat = forms.IntegerField(widget=forms.NumberInput(
         attrs={'class': 'form-control'}))
-
+   
 
 class ProfForm(forms.ModelForm):
     class Meta:
@@ -21,10 +21,10 @@ class ProfForm(forms.ModelForm):
         fields = "__all__"
     NNI = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control'}))
-    Nodep = forms.ModelChoiceField(queryset=DEPART.objects.all(),
-                                   widget=forms.Select(attrs={'class': 'form-control'}))
-    Grade = forms.ModelChoiceField(queryset=Grades.objects.all(
-    ), widget=forms.Select(attrs={'class': 'form-control'}))
+    # Nodep = forms.ModelChoiceField(queryset=DEPART.objects.all(),
+    #                                widget=forms.Select(attrs={'class': 'form-control'}))
+    # Grade = forms.ModelChoiceField(queryset=Grades.objects.all(
+    # ), widget=forms.Select(attrs={'class': 'form-control'}))
     Nom = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control'}))
     Type = (
@@ -38,6 +38,8 @@ class ProfForm(forms.ModelForm):
         attrs={'class': 'form-control'}))
     Email = forms.EmailField(widget=forms.EmailInput(
         attrs={'class': 'form-control'}))
+    CompteBancaire = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control'}))
     Sexe = (
         ('Male', 'Male'),
         ('Femelle', 'Femelle'),
@@ -45,8 +47,20 @@ class ProfForm(forms.ModelForm):
     )
     sexe = forms.ChoiceField(choices=Sexe, widget=forms.Select(
         attrs={'class': 'form-control'}))
+   
+    def __init__(self, *args, **kwargs):
+        super(ProfForm, self).__init__(*args, **kwargs)
 
+        self.fields["Grade"].label_from_instance = lambda obj: obj.nomGrade
+        self.fields["Grade"].widget.attrs.update({"class": "form-control"})
 
+        self.fields["Nodep"].label_from_instance = lambda obj: obj.Nom  
+        self.fields["Nodep"].widget.attrs.update({"class": "form-control"})
+ 
+    
+
+  
+     
 
 class CoursForm(forms.ModelForm):
     class Meta:
