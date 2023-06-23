@@ -40,7 +40,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+<style>
+.vertical-line {
+    border-right: 0.5px solid black;
+}
 
+</style>
 </head>
 <body>
 
@@ -60,8 +65,6 @@
     <i class="fas fa-bars"></i>
     </a>
     </div>
-    
-    
     
     
     <a class="mobile_btn" id="mobile_btn">
@@ -206,10 +209,11 @@
     <div class="page-header">
     <div class="row align-items-center">
     <div class="col">
-    <h3 class="page-title">matières</h3>
+    <h3 class="page-title">Suivie matières</h3> <br>
+  
     <ul class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/salle">matières</a></li>
-    <li class="breadcrumb-item active">Liste des matières</li>
+        <h6 class="">Semestres:{{semestres}} /</h6> <br>
+        <h6>Annees universitaire: {{ annee }} - {{ annee_precedente }}</h6>
     </ul>
     </div>
     </div>
@@ -246,19 +250,25 @@
             </div>
           <div class="col-auto text-end float-end ms-auto download-grp">
     <a href="#" id="exportLink" class="btn btn-outline-primary me-2"><i class="fas fa-download"></i> Download</a>
+    <select id="filiereSelect" class="form-select">
+        <option value="">Sélectionner une filière</option>
+        {% for filiere in Filieres %}
+            <option value="{{ filiere.id }}">{{ filiere.LibelleProfil }}</option>
+        {% endfor %}
+    </select>
+
 </div>
 
         </div>
         
     <div class="table-responsive">
         <table id="exportTable" class="table border-0 star-student table-hover table-center mb-0 datatable table-striped">
-           
-                    <thead>
+            <thead>
                 <tr>
-                    <th rowspan="2">CodeEM</th>
-                    <th colspan="5">Planification</th>
-                    <th colspan="4">Realisation</th>
-                    <th colspan="4">% Avancement</th>
+                    <th rowspan="2" colspan="2" >CodeEM</th>
+                    <th colspan="5" class="vertical-line">Planification</th>
+                    <th colspan="4" class="vertical-line">Realisation</th>
+                    <th colspan="4">Avancement</th>
                 </tr>
                 <tr>
                     <th>CM</th>
@@ -276,10 +286,12 @@
                     <th>Projet</th>
                 </tr>
             </thead>
+            
             <tbody>
                 {% for matiere in Matieres %}
                     <tr>
                         <td>{{ matiere.Nummat }}</td>
+                        <td>{{ matiere.Mat }}</td>
                         <td>{{ matiere.CM }}</td>
                         <td>{{ matiere.TD }}</td>
                         <td>{{ matiere.TP }}</td>
@@ -310,6 +322,7 @@
        <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 
    <script>
+
 
 $(document).ready(function() {
     // Gérer le clic sur le bouton "Download"
@@ -370,8 +383,6 @@ function s2ab(s) {
 }
 
 
-
-
     $(document).ready(function() {
         // Changer la couleur des cases selon l'avancement
         $('.datatable tbody td').each(function() {
@@ -385,13 +396,10 @@ function s2ab(s) {
             }
         });
     });
+
+
+    
 </script>
-
-    
-    
-    
-
-
 
     <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
 

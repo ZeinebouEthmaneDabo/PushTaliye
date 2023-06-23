@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import IncrementAnneeView
+
 
 urlpatterns = [
     
@@ -18,7 +18,7 @@ urlpatterns = [
     path('addFil', views.addF, name='addF'),
     path('addm/<slug:filiere_id>', views.addM, name='addM'),
     path('addp', views.addprof, name='addp'),
-    path('matSuivie', views.matSuivie, name='matSuivie'),
+    path('matSuivie/', views.matSuivie, name='matSuivie'),
     path('salle', views.home, name='salle'),
     path('filiere', views.homeF, name='filiere'),
     path('ListeEmplois', views.ListeEmplois, name='ListeEmplois'),
@@ -56,7 +56,8 @@ urlpatterns = [
     path('remplir_cours/<int:semaine_id>/<int:jour_id>/', views.remplir_cours, name='remplir_cours'),
     path('enregistrer_cours/', views.enregistrer_cours, name='enregistrer_cours'),
     path('afficher_cours_semaine/', views.affichCoursSemaine, name='affichCoursSemaine'),
-    path('pageincrementAnnees/', views.pageincrementAnnees, name='pageincrementAnnees'),
-    path('increment_annee/', IncrementAnneeView.as_view(), name='increment_annee'),]   
-   
+    path('annee-en-cours/', views.annee_en_cours, name='annee_en_cours'),
+    path('incrementer-annee/', views.incrementer_annee, name='incrementer_annee'),
+    
 
+]

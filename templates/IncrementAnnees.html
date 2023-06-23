@@ -194,17 +194,34 @@
   </div>
   </div>
   </div>
+  <div class="page-wrapper">
+    <div class="content container-fluid">
+    
+
   
 
 
-      <h1>Incrémenter l'année en cours</h1>
-      
-      <form method="GET" action="{% url 'increment_annee' %}">
+  
+    <div class="row">
+    <div class="col-sm-12">
+    <div class="card card-table">
+    <div class="card-body">
+
+
+
+  
+      <h1>Année en cours : {{ annee_en_cours.annee }}</h1>
+      <form action="{% url 'incrementer_annee' %}" method="post">
           {% csrf_token %}
-          <input type="submit" value="Incrémenter">
+          <input type="submit" value="Incrémenter l'année"onclick="return confirm('Etes vous sur ?')" >
+        
       </form>
 
-  
+
+</div>
+</div>
+</div>
+</div>
 
 
 

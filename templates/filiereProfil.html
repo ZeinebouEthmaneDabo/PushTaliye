@@ -254,6 +254,8 @@
                 <tr>
                     <th>Nummat</th>
                     <th>Nom</th>
+                    <th>Semestre</th>
+
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -262,6 +264,9 @@
         <tr>
           <td>{{ matiere.Nummat }}</td>
           <td>{{ matiere.Mat }}</td>
+          <td>{{ matiere.Semestre }}</td>
+
+          
                         <td>
                             <a href="{% url 'updateMat' matiere.Nummat %}" class="btn btn-sm bg-danger-light">
                                 <i class="feather-edit"></i>

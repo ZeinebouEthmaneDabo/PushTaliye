@@ -51,6 +51,7 @@
 <link rel="stylesheet" href="{% static 'assets/plugins/select2/css/select2.min.css' %}">
 
 <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
 
 <style>
   .arabic {
@@ -62,13 +63,17 @@
     font-family: 'Amiri', Arial, sans-serif;    text-align: center;
   }
     table {
+      border:solid 2px;
         width: 100%;
         border-collapse: collapse;
+        text-align: center;
     }
 
     th, td {
-        padding: 8px;
-        border: 1px solid #ddd;
+      padding: 15pxpx;
+        padding-left: 20px;
+        
+        border: 2px solid #ddd0dd ;
         text-align: center;
     }
 
@@ -85,9 +90,32 @@
   right:10px;
     }
 
+    @media print {
+       body  * {
+      visibility: hidden;
+    }
 
-  
+    .row,
+    .row * {
+      visibility: visible;
+    }
+
+    .row {
+      position: absolute;
+      left: 0;
+      top: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .row > * {
+    page-break-inside: avoid;
+  }
+  }
 </style>
+  
 
 
 </head>
@@ -248,66 +276,72 @@
 
 <div class="page-wrapper">
     <div class="content container-fluid">
-    
-      <div class="row">
-        <div class="col-sm-12">
-          <div class="card">
-            <div class="card-body">
-              <div class="">
-                <div id="pf">
-                  <p>Institut Supérieur de Comptabilité et</p>
-                  <p>d'Administration des Entreprises</p>
+      <div id="print-content">
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="card">
+              <div class="card-body">
+                <div class="">
+                  <div id="pf">
+                    <p>Institut Supérieur de Comptabilité et</p>
+                    <p>d'Administration des Entreprises</p>
+                  </div>
+                  <div id="pd">
+                    <p>المعهد العالي للمحاسبة و إدارة المؤسسات</p>
+                  </div>
                 </div>
-                <div id="pd">
-                  <p>المعهد العالي للمحاسبة و إدارة المؤسسات</p>
+                <p class="arabic">Semestre:{{semestre}} :السداسي</p>
+                <div class="text-center">
+                  <img src="{% static 'assets/img/logo-iscae2.png' %}">
+                  <p class="arabic">Annees universitaire: {{ annee_en_cours }} - {{ annee_precedente }} :السنة الدراسية</p>
+                  <p class="arabic"><b>Emplois du Temps الجدول الزمني</b></p>
+                  <p class="arabic">Filiere: {{ profil.LibelleProfil }} :الشعبة</p>
                 </div>
-              </div>
       
-              <div class="text-center">
-                <img src="{% static 'assets/img/logo-iscae2.png' %}">
-                <p class="arabic">Annees universitaire: {{ annee_en_cours }} - {{ annee_precedente }} :السنة الدراسية</p>
-                <p class="arabic"><b>Emplois du Temps الجدول الزمني</b></p>
-                <p class="arabic">Filiere: {{ profil.LibelleProfil }} :الشعبة</p>
-              </div>
-      
-              <table>
-                <tr>
-                  <th>Heures/Jours</th>
-                  {% for jour in jours %}
-                  <th>{{ jour.NomJour }}</th>
-                  {% endfor %}
-                </tr>
-                {% for heure in heures %}
-                <tr>
-                  <td>{{ heure.HCours }}</td>
-                  {% for jour in jours %}
-                  <td>
-                    {% for cour, num_jour, horaire, matricule, salle in c_j_h %}
-                    {% if num_jour == jour and horaire == heure %}
-                    <p>{{ cour.Mat }}</p>
-                    <p>{{ matricule.Nom }}</p>
-                    <p>salle: {{ salle.NomSalles }}</p>
-                    {% endif %}
+                <table>
+                  <tr>
+                    <th>Heures/Jours</th>
+                    {% for jour in jours %}
+                    <th>{{ jour.NomJour }}</th>
                     {% endfor %}
-                  </td>
+                  </tr>
+                  {% for heure in heures %}
+                  <tr>
+                    <td>{{ heure.HCours }}</td>
+                    {% for jour in jours %}
+                    <td>
+                      {% for cour, num_jour, horaire, matricule, salle in c_j_h %}
+                      {% if num_jour == jour and horaire == heure %}
+                      <p>{{ cour.Mat }}</p>
+                      <p>{{ matricule.Nom }}</p>
+                      <p>salle: {{ salle.NomSalles }}</p>
+                      {% endif %}
+                      {% endfor %}
+                    </td>
+                    {% endfor %}
+                  </tr>
                   {% endfor %}
-                </tr>
-                {% endfor %}
-              </table>
+                </table>
+              </div>
             </div>
           </div>
         </div>
       </div>
       
+      <button onclick="printPage()">Print</button>
       
-      <form method="post" action="{% url 'export_to_pdf' code_profil=profil.codeProfil %}">
-        
-        {% csrf_token %}
-        <!-- Reste du formulaire -->
-        <button type="submit">Exporter en PDF</button>
-      </form>
-          
-        
+      <script>
+        function printPage() {
+          var printContent = document.getElementById('print-content');
+          if (printContent) {
+            var originalBody = document.body.innerHTML;
+            document.body.innerHTML = printContent.innerHTML;
+            window.print();
+            document.body.innerHTML = originalBody;
+          }
+        }
+      </script>
+      
         
            
             

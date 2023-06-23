@@ -1,6 +1,7 @@
 from cProfile import Profile
 from datetime import date
 import datetime
+import os
 from pdb import Pdb
 import zipfile
 from django import forms
@@ -254,15 +255,28 @@ def BASE(request):
 def salle(request):
     return render(request, 'salle.html')
 
-
+from django.db.models import Max
 @login_required
 @cache_control(no_cache=True, must_revalidate=True,no_store=True)
+
 def index(request):
+    if request.method == "POST":
+        annee = request.POST.get("annee")
+        request.session["annee_selectionnee"] = annee
+        semestre = request.POST.get("Semestre")
+        request.session["semestre_selectionne"] = semestre
+
     count = Salles.objects.count()
     countp = Professeurs.objects.count()
     countd = DEPART.objects.count()
     countf = Profil.objects.count()
-    return render(request, 'index.html', {'count': count, 'countp': countp, 'countd': countd, 'countf': countf })
+    Annees = AnneeEnCours.objects.all()
+    Semestres = Semestre.objects.values_list('type', flat=True).distinct()
+    annee_selectionnee = request.session.get("annee_selectionnee")
+    semestre_selectionne = request.session.get("semestre_selectionne")
+    
+    annee_max = AnneeEnCours.objects.aggregate(max_annee=Max('annee'))['max_annee']
+    return render(request, 'index.html', {'count': count, 'countp': countp, 'countd': countd, 'countf': countf, 'Annees': Annees, 'Semestre': Semestres, 'annee_selectionnee': annee_selectionnee, 'semestre_selectionne': semestre_selectionne, 'annee_max': annee_max})
 
 
 
@@ -395,7 +409,8 @@ from django.shortcuts import get_object_or_404
 def addM(request, filiere_id):
     profile = get_object_or_404(Profil, codeProfil=filiere_id)
     niveau = profile.Niv  # Récupérer le niveau de la filière
-    semestres = Semestre.objects.filter(Niv=niveau)  # Filtrer les semestres par le niveau de la filière
+    Semestre_selectionnee =request.session.get("semestre_selectionne")
+    semestres = Semestre.objects.filter(Niv=niveau,type=Semestre_selectionnee)  # Filtrer les semestres par le niveau de la filière
 
     if request.method == "POST":
         Nummat=request.POST.get("Num")
@@ -516,8 +531,9 @@ def deleteProf(request, matricule):
 @login_required
 @cache_control(no_cache=True, must_revalidate=True,no_store=True)
 def mat(request, filiere_id):
+    Semestre_selectionnee =request.session.get("semestre_selectionne")
     filiere = get_object_or_404(Profil, codeProfil=filiere_id)
-    matieres = Matieres.objects.filter(Noprfl=filiere_id)
+    matieres = Matieres.objects.filter(Noprfl=filiere_id,Sem__type=Semestre_selectionnee)
     context = {"Profil": filiere, "Matieres": matieres}
     return render(request, "filiereProfil.html", context)
 
@@ -562,12 +578,20 @@ def emp(request):
 def addc(request, filiere_id):
     profile = get_object_or_404(Profil, codeProfil=filiere_id)
     form = CoursForm(request.POST or None)
+    Annees=AnneeEnCours.objects.all()
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee) 
+    type_selectionne = request.session.get("semestre_selectionne")
+    niveau_filiere = profile.Niv
+    semestre = Semestre.objects.get(Niv=niveau_filiere,type=type_selectionne)
 
+    derniere_annee = AnneeEnCours.objects.order_by('-annee').first()
     if request.method == "POST":
         if form.is_valid():
             cours = form.save(commit=False)
             cours.NOPRFL_id = filiere_id  # Assign the filiere_id to the foreign key
-
+            cours.Semestre = semestre
+            cours.annee= annee_obj
             matricule = form.cleaned_data.get("Matricule")
             cd_horaire = form.cleaned_data.get("Cd_Horaire")
             num_jour = form.cleaned_data.get("NumJour")
@@ -607,11 +631,15 @@ def addc(request, filiere_id):
             return redirect("/affichCours/{0}".format(filiere_id)) 
 
     else:
-        form.fields["Mat"].queryset = Matieres.objects.filter(Noprfl_id=filiere_id)
+      
+      
+        form.fields["Mat"].queryset = Matieres.objects.filter(Noprfl_id=filiere_id,Sem=semestre)
+       
 
     context = {
         "form": form,
         "filiere_id": filiere_id,
+        "Annees":Annees
 }
     
 
@@ -619,19 +647,21 @@ def addc(request, filiere_id):
     if request.method == "POST" and form.is_valid():
         cd_horaire = form.cleaned_data["Cd_Horaire"]
         num_jour = form.cleaned_data["NumJour"]
-
+        
         salles_occupees = EmploisCours.objects.filter(
-            Cd_Horaire=cd_horaire, NumJour=num_jour
+            Cd_Horaire=cd_horaire, NumJour=num_jour,annee= annee_obj,Semestre__type=type_selectionne
         ).values_list('salle', flat=True)
 
         professeurs_occupees = EmploisCours.objects.filter(
-            Cd_Horaire=cd_horaire, NumJour=num_jour
+            Cd_Horaire=cd_horaire, NumJour=num_jour,annee= annee_obj,Semestre__type=type_selectionne
         ).values_list('Matricule', flat=True)
         occupied_hours = EmploisCours.objects.filter(
            NumJour=num_jour,
-            NOPRFL_id=profile,  # Ajoutez le filtrage par filière
+           NOPRFL=profile,annee= annee_obj,Semestre__type=type_selectionne  # Ajoutez le filtrage par filière
        ).values_list('Cd_Horaire', flat=True)
-        form.fields["Cd_Horaire"].queryset = Horaire.objects.exclude(id__in=occupied_hours)
+        
+        form.fields["Cd_Horaire"].queryset = Horaire.objects.all()
+        form.fields["Cd_Horaire"].queryset = Horaire.exclude(cd__in=occupied_hours)
         form.fields["salle"].queryset = Salles.objects.exclude(id__in=salles_occupees)
         form.fields["Matricule"].queryset = Professeurs.objects.exclude(Matricule__in=professeurs_occupees)
         form.fields["salle"].queryset = Salles.objects.all()  # Liste complète des salles
@@ -640,37 +670,25 @@ def addc(request, filiere_id):
     return render(request, "addc.html", context=context)
 from django.http import JsonResponse
 
-def occupancyHeures_api(request):
-    selected_jour = request.GET.get('jour')
-    filiere_id = request.GET.get('filiere_id')
 
-    occupied_hours = EmploisCours.objects.filter(
-        NumJour=selected_jour, NOPRFL_id=filiere_id
-    ).values_list('Cd_Horaire', flat=True)
-
-    available_hours = Horaire.objects.exclude(cd__in=occupied_hours)
-
-    data = {
-        'available_hours': list(available_hours.values_list('cd', flat=True)),
-    }
-
-    return JsonResponse(data)
 
 
 def occupancy_api(request):
     selected_jour = request.GET.get('jour')
     
     selected_horaire = request.GET.get('horaire')
-
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee) 
+    type_selectionne = request.session.get("semestre_selectionne")
         # Récupération des salles et des professeurs occupés pour l'horaire et le jour spécifiés
     occupied_salles = EmploisCours.objects.filter(
             Cd_Horaire=selected_horaire,
-            NumJour=selected_jour
+            NumJour=selected_jour,annee= annee_obj,Semestre__type=type_selectionne
         ).values_list('salle', flat=True)
 
     occupied_professeurs = EmploisCours.objects.filter(
             Cd_Horaire=selected_horaire,
-            NumJour=selected_jour
+            NumJour=selected_jour,annee= annee_obj,Semestre__type=type_selectionne
         ).values_list('Matricule', flat=True)
 
     data = {
@@ -681,12 +699,34 @@ def occupancy_api(request):
     return JsonResponse(data)
 
 
+def occupancyHeures_api(request):
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee) 
+    type_selectionne = request.session.get("semestre_selectionne")
+    selected_jour = request.GET.get('jour')
+    filiere_id = request.GET.get('filiere_id')
 
+    occupied_hours = EmploisCours.objects.filter(
+        NumJour=selected_jour, NOPRFL=filiere_id,annee= annee_obj,Semestre__type=type_selectionne
+    ).values_list('Cd_Horaire', flat=True)
+
+    data = {
+        
+        'occupied_hours': list(occupied_hours),
+        
+    }
+
+    return JsonResponse(data)
 
 def homeC(request, filiere_id):
     filiere = get_object_or_404(Profil, codeProfil=filiere_id)
-    pr = EmploisCours.objects.filter(NOPRFL=filiere_id)
-    context = {"Profil": filiere, "EmploisCours": pr}
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee)  # Obtenir l'objet AnneeEnCours correspondant à l'année sélectionnée
+    type_selectionne = request.session.get("semestre_selectionne")
+    niveau_filiere = filiere.Niv
+    semestre = Semestre.objects.get(Niv=niveau_filiere, type=type_selectionne)
+    pr = EmploisCours.objects.filter(NOPRFL=filiere_id, annee=annee_obj.id,Semestre=semestre)  # Filtrer les emplois de cours par filière et ID de l'année
+    context = {"Profil": filiere, "EmploisCours": pr, "AnneeSelectionnee": annee_obj}
     return render(request, "affichCours.html", context=context)
 
 
@@ -728,19 +768,25 @@ from datetime import date
 
 def Emplois(request, code_profil):
     # Récupérer l'année en cours
-    annee_en_cours = AnneeEnCours.objects.first()
-    annee = annee_en_cours.annee if annee_en_cours else date.today().year
-
+    profil = get_object_or_404(Profil, codeProfil=code_profil)
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee) 
+    derniere_annee = AnneeEnCours.objects.order_by('-annee').first()
+    type_selectionne = request.session.get("semestre_selectionne")
+    niveau_filiere = profil.Niv
+    semestre = Semestre.objects.get(Niv=niveau_filiere, type=type_selectionne)
+    Se=semestre.NSem
+    anneec = annee_obj.annee if annee_obj else date.today().year
     # Calculer l'année précédente
-    annee_precedente = annee - 1
+    annee_precedente = anneec - 1
 
     # Récupérer le profil correspondant
-    profil = get_object_or_404(Profil, codeProfil=code_profil)
+  
     jours = Jours.objects.all()
     heures = Horaire.objects.all()
 
     c_j_h = []
-    cours = EmploisCours.objects.filter(NOPRFL=profil)
+    cours = EmploisCours.objects.filter(NOPRFL=profil,annee= annee_obj,Semestre=semestre)
     for cours_item in cours:
         if cours_item.Cd_Horaire in heures and cours_item.NumJour in jours:
             c_j_h.append((cours_item.Mat, cours_item.NumJour, cours_item.Cd_Horaire, cours_item.Matricule, cours_item.salle))
@@ -750,56 +796,65 @@ def Emplois(request, code_profil):
         'jours': jours,
         'heures': heures,
         'profil': profil,
-        'annee_en_cours': annee,
-        'annee_precedente': annee_precedente
+        'annee_en_cours': anneec,
+        'annee_precedente': annee_precedente,
+        'semestre': Se
     }
     return render(request, 'Emplois.html', context)
 
 
 def EmploisSalles(request,salle):
-    # Récupérer l'année en cours
-    annee_en_cours = AnneeEnCours.objects.first()
-    annee = annee_en_cours.annee if annee_en_cours else date.today().year
-
+   
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee) 
+    derniere_annee = AnneeEnCours.objects.order_by('-annee').first()
+    anneec = annee_obj.annee if annee_obj else date.today().year
+  
     # Calculer l'année précédente
-    annee_precedente = annee - 1
-
+    annee_precedente = anneec - 1
+    type_selectionne = request.session.get("semestre_selectionne")
     # Récupérer le profil correspondant
     salle = Salles.objects.get(NomSalles=int(salle))
     jours = Jours.objects.all()
     heures = Horaire.objects.all()
+    semestres = Semestre.objects.filter(type=type_selectionne)
+    semestre_list = [semestre.NSem for semestre in semestres]
+
 
     c_j_h = []
-    cours = EmploisCours.objects.filter(salle=salle)
+    cours = EmploisCours.objects.filter(salle=salle,annee= annee_obj,Semestre__type=type_selectionne)
+   
     for cours_item in cours:
         if cours_item.Cd_Horaire in heures and cours_item.NumJour in jours:
             c_j_h.append((cours_item.Mat, cours_item.NumJour, cours_item.Cd_Horaire, cours_item.Matricule, cours_item.NOPRFL))
-
+            
     context = {
         'c_j_h': c_j_h,
         'jours': jours,
         'heures': heures,
         'Salles': salle,
-        'annee_en_cours': annee,
-        'annee_precedente': annee_precedente
+        'annee_en_cours': anneec,
+        'annee_precedente': annee_precedente,
+        'semestre':semestre_list
     }
     return render(request, 'EmploisSalle.html', context)
 
 def EmploisProf(request,nni):
-    # Récupérer l'année en cours
-    annee_en_cours = AnneeEnCours.objects.first()
-    annee = annee_en_cours.annee if annee_en_cours else date.today().year
-
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee) 
+    derniere_annee = AnneeEnCours.objects.order_by('-annee').first()
+    anneec = annee_obj.annee if annee_obj else date.today().year
     # Calculer l'année précédente
-    annee_precedente = annee - 1
-
+    annee_precedente = anneec - 1
     # Récupérer le profil correspondant
+    type_selectionne = request.session.get("semestre_selectionne")
     prof =Professeurs.objects.get(NNI=nni)
     jours = Jours.objects.all()
     heures = Horaire.objects.all()
-
+    semestres = Semestre.objects.filter(type=type_selectionne)
+    semestre_list = [semestre.NSem for semestre in semestres]
     c_j_h = []
-    cours = EmploisCours.objects.filter(Matricule=prof)
+    cours = EmploisCours.objects.filter(Matricule=prof,annee=annee_obj,Semestre__type=type_selectionne)
     for cours_item in cours:
         if cours_item.Cd_Horaire in heures and cours_item.NumJour in jours:
             c_j_h.append((cours_item.Mat, cours_item.NumJour, cours_item.Cd_Horaire, cours_item.salle, cours_item.NOPRFL))
@@ -809,8 +864,10 @@ def EmploisProf(request,nni):
         'jours': jours,
         'heures': heures,
         'Profs': prof,
-        'annee_en_cours': annee,
-        'annee_precedente': annee_precedente
+        'annee_en_cours': anneec,
+        'annee_precedente': annee_precedente,
+        'semestre':semestre_list
+
     }
     return render(request, 'EmploisProf.html', context)
 
@@ -844,14 +901,6 @@ def display_usernames(request):
 
 
 
-from io import BytesIO
-from django.template.loader import render_to_string
-from xhtml2pdf import pisa
-from django.http import HttpResponse
-from django.http import HttpResponse
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
-from reportlab.lib import colors
 
 from django.http import HttpResponse
 from django.template.loader import get_template
@@ -1148,6 +1197,9 @@ from datetime import timedelta
 from datetime import datetime, timedelta
 from .models import Semaine, DateJour, Jours
 
+from datetime import datetime, timedelta
+from .models import Semaine, DateJour, Jours,TypeSemestre
+
 def enregistrer_debut_semaines(request):
     if request.method == 'POST':
         # Récupérer la date de début à partir du formulaire
@@ -1156,6 +1208,11 @@ def enregistrer_debut_semaines(request):
         # Convertir la date de début en objet de type datetime
         date_debut = datetime.strptime(date_debut, '%Y-%m-%d')
 
+        # Récupérer l'année et la parité sélectionnées dans la session
+        annee = request.session.get('annee_selectionnee')
+        parite = request.session.get('semestre_selectionne')
+        annee_obj = AnneeEnCours.objects.get(annee=annee) 
+        parite_obj=TypeSemestre.objects.get(parite=parite) 
         # Parcourir les 16 semaines
         for i in range(16):
             # Calculer la date du jour en ajoutant le numéro de semaine * 7 jours à la date de début
@@ -1163,23 +1220,14 @@ def enregistrer_debut_semaines(request):
 
             # Calculer le numéro de la semaine
             numero_semaine = "S" + str(i + 1)
-
-            # Vérifier si le numéro de semaine dépasse 16
-            if i >= 16:
-                numero_semaine = "S" + str(i - 15)  # Revenir à S1
-
-            # Récupérer la semaine correspondante s'il existe déjà
-            semaine = Semaine.objects.filter(semaine=numero_semaine).first()
-
-            if semaine is None:
-                # Créer une nouvelle instance de Semaine avec le numéro de semaine
-                semaine = Semaine(semaine=numero_semaine, gen=False)
-                semaine.save()
+ 
+            # Créer une nouvelle instance de Semaine avec le numéro de semaine, l'année et la parité
+            semaine = Semaine.objects.create(semaine=numero_semaine, annee=annee_obj, parite=parite_obj, gen=False)
 
             # Récupérer tous les jours de la semaine
             jours_semaine = Jours.objects.all()
 
-            # Créer une nouvelle instance de DateJour pour chaque jour de la semaine
+           # Créer une nouvelle instance de DateJour pour chaque jour de la semaine
             for j, jour in enumerate(jours_semaine):
                 # Calculer la date du jour en ajoutant j jours à la date de début de la semaine
                 date_jour_semaine = date_jour + timedelta(days=j)
@@ -1193,18 +1241,27 @@ def enregistrer_debut_semaines(request):
                 # Sauvegarder l'instance dans la base de données
                 date_jour_obj.save()
 
+            # Calculer la date du jour suivant pour la prochaine itération
+            date_jour += timedelta(days=1)
+
         # Afficher un message de succès ou rediriger vers une autre page
         return render(request, 'filiere.html')
 
     return render(request, 'DateJoursCreate.html')
 
 
+
+
 from django.shortcuts import render
 from .models import Semaine, Cours, DateJour
 
 def affichCoursSemaine(request):
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    parite = request.session.get('semestre_selectionne')
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee) 
+    parite_obj=TypeSemestre.objects.get(parite=parite) 
     cours_semaine = Cours.objects.filter(semaine__gen=True)
-    semaines = Semaine.objects.filter(gen=True)
+    semaines = Semaine.objects.filter(gen=True,annee=annee_obj,parite=parite_obj)
     jours = Jours.objects.all()
 
     context = {
@@ -1216,20 +1273,25 @@ def affichCoursSemaine(request):
 
 def generer_semaine(request):
     if request.method == 'POST':
+        derniere_annee = AnneeEnCours.objects.order_by('-annee').first()
+        annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+        parite = request.session.get('semestre_selectionne')
+        annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee) 
+        parite_obj=TypeSemestre.objects.get(parite=parite) 
         semaine_ids = request.POST.getlist('semaines')
         
         if not semaine_ids:
             message = "Veuillez sélectionner au moins une semaine."
-            semaines = Semaine.objects.filter(gen=False)
+            semaines = Semaine.objects.filter(gen=False,annee=annee_obj,parite=parite_obj)
             context = {'semaines': semaines, 'error_message': message}
             return render(request, 'afficher_semaines.html', context)
         
-        semaines = Semaine.objects.filter(id__in=semaine_ids)
+        semaines = Semaine.objects.filter(id__in=semaine_ids,annee=annee_obj,parite=parite_obj)
         semaines_precedentes_non_generees = Semaine.objects.filter(gen=False, id__lt=semaine_ids[0])
         
         if semaines_precedentes_non_generees.exists():
             message = "Veuillez d'abord générer les semaines précédentes."
-            semaines = Semaine.objects.filter(gen=False)
+            semaines = Semaine.objects.filter(gen=False,annee=annee_obj,parite=parite_obj)
             context = {'semaines': semaines, 'error_message': message}
             return render(request, 'afficher_semaines.html', context)
         
@@ -1243,11 +1305,11 @@ def generer_semaine(request):
             date_jours = DateJour.objects.filter(Semaine__in=semaines, NumJour=jour)
 
             for date_jour in date_jours:
-                emplois_cours = EmploisCours.objects.filter(NumJour=jour)
+                emplois_cours = EmploisCours.objects.filter(NumJour=jour,annee=annee_obj.id,Semestre__type=parite)
 
                 for emploi in emplois_cours:
                     cours_existant = Cours.objects.filter(
-                        matricule=emploi.Matricule,
+                        matricule=emploi.Matricule, 
                         noprfl=emploi.NOPRFL,
                         mat=emploi.Mat,
                         cd_horaire=emploi.Cd_Horaire,
@@ -1255,7 +1317,9 @@ def generer_semaine(request):
                         semaine=date_jour.Semaine,
                         CDDateJour=date_jour,
                         NumJour=jour,
-                        natcours=emploi.NatCours
+                        natcours=emploi.NatCours,
+                        annee=emploi.annee,
+                        Semestre=emploi.Semestre
                     ).exists()
 
                     if not cours_existant:
@@ -1268,20 +1332,25 @@ def generer_semaine(request):
                             semaine=date_jour.Semaine,
                             CDDateJour=date_jour,
                             NumJour=jour,
-                            natcours=emploi.NatCours
+                            natcours=emploi.NatCours,
+                            annee=emploi.annee,
+                            Semestre=emploi.Semestre
                         )
                         cours.save()
 
         cours_semaine = Cours.objects.filter(semaine__in=semaines)
-        semaines = Semaine.objects.filter(gen=True)
+        semaines = Semaine.objects.filter(gen=True,annee=annee_obj,parite=parite_obj)
         context = {
             'cours_semaine': cours_semaine,
             'jours': jours,
             'semaines': semaines
         }
         return render(request, 'affichCoursSemaine.html', context)
-
-    semaines = Semaine.objects.filter(gen=False)
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    parite = request.session.get('semestre_selectionne')
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee) 
+    parite_obj=TypeSemestre.objects.get(parite=parite) 
+    semaines = Semaine.objects.filter(gen=False,annee=annee_obj,parite=parite_obj)
     context = {'semaines': semaines}
     return render(request, 'afficher_semaines.html', context)
 
@@ -1383,58 +1452,63 @@ from django.db.models import Count
 
 
 
-from django.shortcuts import render
-from .models import Matieres, Cours
+
+from django.http import JsonResponse
 
 def matSuivie(request):
-    matieres = Matieres.objects.all()
-
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    type_selectionne = request.session.get('semestre_selectionne')
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee)
+    anneec = annee_obj.annee if annee_obj else date.today().year
+  
+    # Calculer l'année précédente
+    annee_precedente = anneec - 1 
+    semestres = Semestre.objects.filter(type=type_selectionne)
+    semestre_list = [semestre.NSem for semestre in semestres]
+    matieres = Matieres.objects.filter(Sem__type=type_selectionne)
+    filieres = Profil.objects.all()
     for matiere in matieres:
         matiere.planification = {
-            'CM': Cours.objects.filter(mat=matiere, natcours='CM', vl=True).count(),
-            'TD': Cours.objects.filter(mat=matiere, natcours='TD', vl=True).count(),
-            'TP': Cours.objects.filter(mat=matiere, natcours='TP', vl=True).count(),
-            'PR': Cours.objects.filter(mat=matiere, natcours='Projet', vl=True).count()
+            'CM': Cours.objects.filter(mat=matiere, natcours='CM', vl=True,annee=annee_obj,Semestre__type=type_selectionne).count(),
+            'TD': Cours.objects.filter(mat=matiere, natcours='TD', vl=True,annee=annee_obj,Semestre__type=type_selectionne).count(),
+            'TP': Cours.objects.filter(mat=matiere, natcours='TP', vl=True,annee=annee_obj,Semestre__type=type_selectionne).count(),
+            'PR': Cours.objects.filter(mat=matiere, natcours='PR', vl=True,annee=annee_obj,Semestre__type=type_selectionne).count()
         }
 
         matiere.realisation = {
-            'CM': Cours.objects.filter(mat=matiere, vl=True, natcours='CM').count(),
-            'TD': Cours.objects.filter(mat=matiere, vl=True, natcours='TD').count(),
-            'TP': Cours.objects.filter(mat=matiere, vl=True, natcours='TP').count(),
-            'PR': Cours.objects.filter(mat=matiere, vl=True, natcours='Projet').count()
+            'TD': Cours.objects.filter(mat=matiere, natcours='TD', vl=True, annee=annee_obj,Semestre__type=type_selectionne).count(),      
+            'CM': Cours.objects.filter(mat=matiere, natcours='CM', vl=True, annee=annee_obj,Semestre__type=type_selectionne).count(),
+            'TP': Cours.objects.filter(mat=matiere, natcours='TP', vl=True, annee=annee_obj,Semestre__type=type_selectionne).count(),          
+            'PR': Cours.objects.filter(mat=matiere, natcours='PR', vl=True, annee=annee_obj,Semestre__type=type_selectionne).count(),
         }
 
-      
         matiere.avancement = {
-                'CM': round((matiere.realisation['CM'] / matiere.CM ) * 100, 2),
-                'TD': round((matiere.realisation['TD'] / matiere.TD) * 100, 2),
-                'TP': round((matiere.realisation['TP'] / matiere.TP) * 100, 2),
-                'PR': round((matiere.realisation['PR'] / matiere.PR) * 100, 2)
-            }
-      
+            'CM': round((matiere.realisation['CM'] / matiere.CM) * 100, 2),
+            'TD': round((matiere.realisation['TD'] / matiere.TD) * 100, 2),
+            'TP': round((matiere.realisation['TP'] / matiere.TP) * 100, 2),
+            'PR': round((matiere.realisation['PR'] / matiere.PR) * 100, 2)
+        }
+
     context = {
-        'Matieres': matieres
+        'Matieres': matieres,
+        'filieres': filieres,
+         'annee':annee_selectionnee,
+         'annee_precedente':annee_precedente,
+         'semestres':semestre_list
+
     }
 
     return render(request, 'Suivie_matieres.html', context)
 
+
 from django.shortcuts import render
 from .models import AnneeEnCours
 
-def pageincrementAnnees(request):
-    annee_obj = AnneeEnCours.objects.first()
-    context = {'current_year': annee_obj.annee if annee_obj else None}
-    return render(request, 'IncrementAnnees.html', context)
-
 
 
 from .models import AnneeEnCours
 
-from django.http import JsonResponse
-# 4i mavatt sel7tt
-from django.shortcuts import render
-from django.views import View
-from .models import AnneeEnCours
+
 
 from django.http import JsonResponse
 
@@ -1442,27 +1516,32 @@ from django.shortcuts import render, redirect
 from django.views import View
 from .models import AnneeEnCours, EmploisCours
 
-class IncrementAnneeView(View):
-    def get(self, request):
-        # Récupérer l'année en cours
-        annee_en_cours = AnneeEnCours.objects.first()
-        
-        if annee_en_cours:
-            # Incrémenter l'année en cours
-            nouvelle_annee = annee_en_cours.annee + 1
-        else:
-            # Si aucune année en cours n'existe, commencer à partir de 1
-            nouvelle_annee = 1
-        
-        # Créer un nouvel objet AnneeEnCours avec la nouvelle année
-        AnneeEnCours.objects.create(annee=nouvelle_annee)
-        
-        # Mettre à jour la valeur de l'année pour tous les enregistrements de EmploisCours
-        emplois_cours = EmploisCours.objects.all()
-        emplois_cours.update(annee=nouvelle_annee)
-        
-        # Rediriger vers une page de confirmation ou une autre vue
-        return redirect('confirmation')
+from django.shortcuts import render
+from .models import AnneeEnCours
+
+def annee_en_cours(request):
+    # Récupérer la dernière année enregistrée
+    derniere_annee = AnneeEnCours.objects.order_by('-annee').first()
+
+    context = {
+        'annee_en_cours': derniere_annee
+    }
+
+    return render(request, 'IncrementAnnees.html', context)
+
+
+def incrementer_annee(request):
+    # Récupérer la dernière année enregistrée
+    derniere_annee = AnneeEnCours.objects.order_by('-annee').first()
+
+    # Incrémenter l'année
+    nouvelle_annee = derniere_annee.annee + 1
+
+    # Créer une nouvelle instance de l'objet AnneeEnCours avec la nouvelle année
+    nouvelle_instance = AnneeEnCours.objects.create(annee=nouvelle_annee)
+
+    # Rediriger vers la vue de l'année en cours
+    return redirect('annee_en_cours')
 
 
 

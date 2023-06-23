@@ -1,5 +1,6 @@
 from django import forms
-from . models import DEPART, EmploisCours, Grades, Horaire, Jours, Matieres, Profil, Professeurs, Salles
+from requests import request
+from . models import DEPART, AnneeEnCours, EmploisCours, Grades, Horaire, Jours, Matieres, Profil, Professeurs, Salles
 # rofil = forms.ModelChoiceField(queryset=Profil.objects.all())
 
 
@@ -63,63 +64,22 @@ class ProfForm(forms.ModelForm):
      
 
 class CoursForm(forms.ModelForm):
+   
+ 
     class Meta:
         model = EmploisCours
         fields = [
-            "id",
+            
             "Matricule",
             "Mat",
             "Cd_Horaire",
             "salle",
             "NumJour",
             "NatCours",
+         
         ]
-        widgets = {
-            "id": forms.TextInput(attrs={"class": "form-control"}),
-        }
-
-    def clean(self):
-        cleaned_data = super().clean()
-        matricule = cleaned_data.get("Matricule")
-        cd_horaire = cleaned_data.get("Cd_Horaire")
-        num_jour = cleaned_data.get("NumJour")
-
-        if matricule and cd_horaire and num_jour:
-            existing_cours = EmploisCours.objects.filter(
-                Matricule=matricule,
-                Cd_Horaire=cd_horaire,
-                NumJour=num_jour
-            ).exists()
-
-            if existing_cours:
-                raise forms.ValidationError("Le professeur occupe déjà un autre cours à ce moment-là.")
-
-        salle = cleaned_data.get("salle")
-        if salle and cd_horaire and num_jour:
-            existing_cours = EmploisCours.objects.filter(
-                salle=salle,
-                Cd_Horaire=cd_horaire,
-                NumJour=num_jour
-            ).exists()
-
-            if existing_cours:
-                raise forms.ValidationError("Cette salle est déjà occupée à ce moment-là.")
-
-        filiere = cleaned_data.get("NOPRFL")
-        if cd_horaire is not None and num_jour is not None and filiere is not None:
-            existing_cours = EmploisCours.objects.filter(
-                Cd_Horaire=cd_horaire,
-                NumJour=num_jour,
-                NOPRFL=filiere,
-            ).exists()
-
-            if existing_cours:
-                raise forms.ValidationError(
-                    "Ce créneau horaire est déjà occupé pour cette filière."
-                )
-
-        return cleaned_data
-
+    
+ 
     def __init__(self, *args, **kwargs):
         super(CoursForm, self).__init__(*args, **kwargs)
 
@@ -144,6 +104,9 @@ class CoursForm(forms.ModelForm):
 
         self.fields["NumJour"].label_from_instance = lambda obj: obj.NomJour 
         self.fields["NumJour"].widget.attrs.update({"class": "form-control"})
+
+     
+
         self.fields["NatCours"].label_from_instance = lambda obj: obj.type 
         self.fields["NatCours"].widget.attrs.update({"class": "form-control"})
      

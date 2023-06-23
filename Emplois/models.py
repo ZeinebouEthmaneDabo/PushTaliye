@@ -16,13 +16,16 @@ def _str_(self):
 
 
 class Niveau(models.Model):
-    
     Noniv= models.CharField(max_length=20, primary_key=True)
+class TypeSemestre(models.Model):
+    parite = models.CharField(max_length=50)
+
  
 class Semestre(models.Model):
-    
     NSem= models.CharField(max_length=20, primary_key=True)
     Niv=models.ForeignKey(Niveau, on_delete=models.CASCADE)
+    parite=models.ForeignKey(TypeSemestre, on_delete=models.CASCADE)
+    type= models.CharField(max_length=40)
 
 class Grades(models.Model):
     nomGrade = models.CharField(max_length=20)
@@ -118,7 +121,6 @@ class Matieres(models.Model):
 
 
 
-
 def _str_(self):
     return f"({self.Mat})"
 
@@ -130,12 +132,12 @@ def _str_(self):
     return f"({self.type})"
 
 class AnneeEnCours(models.Model):
-    annee = models.IntegerField(default=2023)
+    annee = models.IntegerField()
 
 
 
 class EmploisCours(models.Model):
-    id = models.CharField(primary_key=True, max_length=50)
+    id = models.AutoField(primary_key=True)
     Matricule = models.ForeignKey(Professeurs, on_delete=models.CASCADE)
     NOPRFL = models.ForeignKey(Profil, on_delete=models.CASCADE)
     Mat = models.ForeignKey(Matieres, on_delete=models.CASCADE)
@@ -143,18 +145,9 @@ class EmploisCours(models.Model):
     salle = models.ForeignKey(Salles, on_delete=models.CASCADE)
     NumJour = models.ForeignKey(Jours, on_delete=models.CASCADE)
     NatCours = models.ForeignKey(typeCours, on_delete=models.CASCADE)
-    annee = models.ForeignKey(AnneeEnCours, on_delete=models.CASCADE,default=2023)  
-    # Lien avec le modèle AnneeEnCours
-    def get_annee_en_cours(self):
-        return AnneeEnCours.objects.first()
-
-    def Savee(self, *args, **kwargs):
-        if not self.annee:
-            annee_en_cours = self.get_annee_en_cours()
-            if annee_en_cours:
-                self.annee = annee_en_cours
-        super().save(*args, **kwargs)
-
+    Semestre=models.ForeignKey(Semestre, on_delete=models.CASCADE)
+    annee = models.ForeignKey(AnneeEnCours, on_delete=models.CASCADE)  
+ 
 class Pgmemptemps(models.Model):
     Noprfl = models.ForeignKey(Profil, on_delete=models.CASCADE)
     Cd_Horaire = models.ForeignKey(Horaire, on_delete=models.CASCADE)
@@ -193,6 +186,8 @@ class PgmemptempsSI(models.Model):
 
 class Semaine(models.Model):
     semaine=models.CharField(max_length=50)
+    annee = models.ForeignKey(AnneeEnCours, on_delete=models.CASCADE) 
+    parite=models.ForeignKey(TypeSemestre, on_delete=models.CASCADE)
     gen=models.BooleanField(default=False)
 
 
@@ -214,8 +209,9 @@ class Cours(models.Model):
     CDDateJour=models.ForeignKey(DateJour, on_delete=models.CASCADE)
     vl=models.BooleanField(default=False)
     NumJour=models.ForeignKey(Jours, on_delete=models.CASCADE)
-    natcours=models.ForeignKey(typeCours, on_delete=models.CASCADE)
-    annee = models.ForeignKey(AnneeEnCours, on_delete=models.CASCADE,default=2023) 
+    natcours=models.ForeignKey(typeCours, on_delete=models.CASCADE) 
+    Semestre=models.ForeignKey(Semestre, on_delete=models.CASCADE)
+    annee = models.ForeignKey(AnneeEnCours, on_delete=models.CASCADE) 
 
 
     
