@@ -201,8 +201,10 @@
     <div class="row align-items-center">
     <div class="col">
     <ul class="breadcrumb">
-        <li class="breadcrumb-item active"><a href="{% url 'addc' Profil.codeProfil %}">Ajouter un Cours</a></li>
-        <li class="breadcrumb-item active"><a href="{% url 'Emplois' Profil.codeProfil %}">Afficher l'emplois </a></li>
+        <div class="col-auto text-end float-end ms-auto download-grp">
+            <a style="color: white; font-size:large;" class="btn btn-outline-primary me-2" href="{% url 'Emplois' Profil.codeProfil %}"> <li class="fas fa-calendar-alt">   Afficher l'emplois</li>    </a>
+            </div>
+        
     </ul>
     </div>
     </div>
@@ -217,11 +219,7 @@
     </div>
     
 
-    <div class="col-lg-2">
-    <div class="search-student-btn">
-    <button type="submit" class="btn btn-primary">Rechercher</button>
-    </div>
-    </div>
+    
     </div>
     </div>
   </form>
@@ -235,12 +233,12 @@
     <div class="row align-items-center">
     <div class="col">
         {% block content %}  
-        <h1>Liste des Cours pour la filière "{{ Profil.LibelleProfil }}" </h1> 
+        <h3>Liste des Cours pour la filière "{{ Profil.LibelleProfil }}" </h3> 
 
     </div>
     
     <div class="col-auto text-end float-end ms-auto download-grp">
-        <a href="#" id="exportLink" class="btn btn-outline-primary me-2"><i class="fas fa-download"></i> Download</a>
+        <a href="#" id="exportLink" class="btn btn-outline-primary me-2"><i class="fas fa-download"></i> Télécharger</a>
         <a href="{% url 'addc' Profil.codeProfil %}" class="btn btn-primary"><i class="fas fa-plus"></i></a>
         </div>
         </div>

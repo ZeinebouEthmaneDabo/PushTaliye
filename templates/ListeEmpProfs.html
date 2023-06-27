@@ -25,30 +25,147 @@
 
 <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
 <style>
-    .filiere-list {
-    list-style: none;
-    padding: 0;
+   
+
+    .arabic {
+      font-family: 'Amiri', Arial, sans-serif;
+      
+    }
+  
+    p {
+      font-family: 'Amiri', Arial, sans-serif;    text-align: center;
+    }
+    table {
+
+border: solid 2px;
+width: 100%;
+border-collapse: collapse;
+text-align: center;
+table-layout: fixed; 
+
 }
 
-.filiere-item {
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: #f5f5f5;
+th{
+padding: 10px;
+padding-left: 20px;
+border: 2px solid #ddd0dd;
+text-align: center;
+} 
+td {
+padding: 15px;
+padding-left: 20px;
+border: 2px solid #ddd0dd;
+text-align: center;
+height: 100px;
+width: 100px; 
+white-space: nowrap;
+overflow: hidden; 
+text-overflow: ellipsis; 
+
+}
+  
+      #pf{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+      }
+  
+      #pd{
+    position: absolute;
+    top: 10px;
+    right:10px;
+      }
+  
+      @media print {
+         body  * {
+        visibility: hidden;
+      }
+   
+      .row,
+      .row * {
+        visibility: visible;
+      }
+      .header {
+        display: none;
+    }
+    
+    .sidebar {
+        display: none;
+    }
+    
+    .page-wrapper {
+        margin-left: 0 !important;
+    }
+      .row {
+        position: absolute;
+        left: 0;
+        top: 0;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    
+    }
+    .y {
+        page-break-after: always;
 }
 
-.filiere-item a {
-    text-decoration: none;
-    color: #333;
-    font-weight: bold;
-    display: block;
-    padding: 10px;
+    .row > * {
+      page-break-inside: avoid;
+    }
+    .arabic {
+      font-family: 'Amiri', Arial, sans-serif;
+      
+    }
+  
+    p {
+      font-family: 'Amiri', Arial, sans-serif;    text-align: center;
+    }
+      table {
+        border:solid 2px;
+          width: 100%;
+          border-collapse: collapse;
+          text-align: center;
+      }
+  
+      th, td {
+        padding: 15pxpx;
+          padding-left: 20px;
+          
+          border: 2px solid #ddd0dd ;
+          text-align: center;
+      }
+  
+  
+      #pf{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+      }
+  
+      #pd{
+    position: absolute;
+    top: 10px;
+    right:10px;
+      }
+      @page {
+        margin: 0;
+        transform: scale(0.80);
+        transform-origin: top left;
+    }
 }
 
+#im{
+    background-color: rgb(81, 115, 250);
+    color: aliceblue;}
+     
+    #im:hover {
+    background-color: aliceblue; 
+    color:rgb(81, 115, 250);
+}
 
-
-</style>
+    
+  </style>
 </head>
 <body>
 
@@ -206,36 +323,60 @@
 
 
 
-<div class="page-wrapper">
-<div class="content container-fluid">
 
-<div class="page-header">
-<div class="row align-items-center">
-<div class="col">
-
-
-</div>
-</div>
-</div>
-
-<form method="post" action="{% url 'export_to_pdfCollectif' %}">
-{% csrf_token %}
-<div class="row">
-<div class="col-sm-12">
-    <div class="card">
-        <div class="card-body">
-            <h1 style="text-align: center;">Liste des Emplois</h1>
-            <div style="text-align: center;">
-                <input type="checkbox" id="select-all" />
-                <label for="select-all">Select All</label>
-            </div>
-            <ul class="filiere-list" style="list-style-type: none; padding-left: 0;">
-                {% for prof  in Profs %}
+    <div class="page-wrapper">
+        <div class="content container-fluid">
+            <div id="print-content">
+            <div class="row">
+              <ul class="filiere-list" style="list-style-type: none; padding-left: 0;">
+                {% for prof in Profs %}
                 <li style="margin-bottom: 10px;">
-                    <div class="card p-3">
-                        <div class="filiere-item d-flex align-items-center">
-                            <input type="checkbox" class="filiere-checkbox" name="filieres" value="{{ filiere.codeProfil }}" />
-                            <a href="{% url 'EmploisProf' nni=prof.NNI %}" style="margin-left: 10px; text-decoration: none;">{{ prof.Nom }}</a>
+                    <div class="y">
+                  <div class="card p-3">
+                    <div class="col-sm-12">
+                      <div class="card-body">
+                        <div class="">
+                          <div id="pf">
+                            <p>Institut Supérieur de Comptabilité et</p>
+                            <p>d'Administration des Entreprises</p>
+                          </div>
+                          <div id="pd">
+                            <p>المعهد العالي للمحاسبة و إدارة المؤسسات</p>
+                          </div>
+                        </div>
+                        <p class="arabic">Semestre: {{ semestre }} :السداسي</p>
+                        <div class="text-center">
+                          <img src="{% static 'assets/img/logo-iscae2.png' %}">
+                          <p class="arabic">Annees universitaire: {{ annee_en_cours }} - {{ annee_precedente }} :السنة الدراسية</p>
+                          <p class="arabic"><b>Emplois du Temps الجدول الزمني</b></p>
+                          <p class="arabic">Professeur: {{ prof.Nom }} :الشعبة</p>
+                        </div>
+      
+                            <table>
+                                <tr>
+                                  <th>Heures/Jours</th>
+                                  {% for jour in jours %}
+                                  <th>{{ jour.NomJour }}</th>
+                                  {% endfor %}
+                                </tr>
+                                {% for heure in heures %}
+                                <tr>
+                                  <td>{{ heure.HCours }}</td>
+                                  {% for jour in jours %}
+                                  <td>
+                                    {% for Prof,cour, num_jour, horaire, salle,NOPRFL  in c_j_h %}
+                                    {% if Prof == prof and num_jour == jour and horaire == heure %}
+                                    <p> {{ NOPRFL.LibelleProfil }}</p>
+                                    <p>{{ cour.Mat }}</p>
+                                    <p> Salle{{ salle.NomSalles }}</p>
+                                 
+                                    {% endif %}
+                                    {% endfor %} 
+                                  </td>
+                                  {% endfor %}
+                                </tr>
+                                {% endfor %}
+                              </table>
                         </div>
                     </div>
                 </li>
@@ -243,61 +384,16 @@
             </ul>
         </div>
     </div>
-</div>
-</div>
-<button type="submit" style="display: block; margin: 20px auto;" class="btn btn-primary">Export to PDF</button>
-</form>
-
-
-
-
- <div class="row">
-            {% for user in users %}
-            <div class="col-xl-3 col-sm-6 col-12 d-flex">
-                <div class="card bg-comman w-100">
-                    <div class="card-body">
-                        <div class="db-widgets d-flex justify-content-between align-items-center">
-                            <div class="db-info">
-                                <a href="/Listeprof"> <h6>Responsable :</h6></a>
-                                <h5>{{ user.username }}</h5>
-                                <p></p>
-                                <p><a href="{% url 'delete_username' user.username %}" class="btn btn-sm bg-danger-light" onclick="return confirm('Etes vous sur ?')">
-                                    <i class="fas fa-trash-alt"></i>
-                                    </a></p>
-                            </div>
-                            <div class="db-icon">
-                                <a href=""> <img class="" src="{% static 'assets/img/respo.png' %}" alt=""></a>
-                            </div>
-                        </div>  
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+    <button id="im" style="font-size: x-large;" class="btn btn-outline-primary me-2" onclick="printPage()"><i class="fas fa-download">  Imprimer</i></button>
+        <script>
+          function printPage() {
+           
+              window.print();
+            
+            
+          }
+        </script>
         
-
-<script>
-    // Sélection de toutes les filières
-    const selectAllCheckbox = document.getElementById('select-all');
-    const filiereCheckboxes = document.getElementsByClassName('filiere-checkbox');
-
-    selectAllCheckbox.addEventListener('change', function() {
-        for (let checkbox of filiereCheckboxes) {
-            checkbox.checked = this.checked;
-        }
-    });
-
-    // Gestion de la sélection/désélection des filières individuelles
-    for (let checkbox of filiereCheckboxes) {
-        checkbox.addEventListener('change', function() {
-            // Vérifier si toutes les filières sont sélectionnées pour cocher/décocher la case "Select All"
-            const allSelected = [...filiereCheckboxes].every(checkbox => checkbox.checked);
-            selectAllCheckbox.checked = allSelected;
-        });
-    }
-</script>
-
-
 
 <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
 

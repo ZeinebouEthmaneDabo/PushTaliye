@@ -203,7 +203,7 @@
     <div class="col">
     <h3 class="page-title">matières</h3>
     <ul class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/salle">matières</a></li>
+    <li class="breadcrumb-item">matières</li>
     <li class="breadcrumb-item active">Liste des matières</li>
     </ul>
     </div>
@@ -214,19 +214,67 @@
     <div class="row">
     <div class="col-lg-3 col-md-6">
     <div class="form-group">
-    <input type="text" name="q" class="form-control" placeholder=" ">
+        <input type="text" name="Mat" id="Mat-input" class="form-control" placeholder="Rechercher par nom" value="{{ search_query }}">
     </div>
     </div>
     
 
-    <div class="col-lg-2">
-    <div class="search-student-btn">
-    <button type="submit" class="btn btn-primary">Rechercher</button>
-    </div>
-    </div>
+    
     </div>
     </div>
   </form>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script>
+$(document).ready(function() {
+  var typingTimer;
+  var doneTypingInterval = 500; // In milliseconds (adjust as needed)
+  var searchInput = $('#Mat-input');
+  var suggestionsContainer = $('#suggestions-container');
+
+  searchInput.on('input', function() {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(getSearchResults, doneTypingInterval);
+  });
+
+  function getSearchResults() {
+    var searchQuery = searchInput.val().trim();
+    if (searchQuery === '') {
+      suggestionsContainer.html('');
+    } else {
+      $.ajax({
+        url: '/search-results/',  // Replace with the actual URL for fetching search results
+        method: 'GET',
+        data: { search_query: searchQuery },
+        success: function(data) {
+          suggestionsContainer.html(data);
+        },
+        error: function() {
+          suggestionsContainer.html('An error occurred while fetching search results.');
+        }
+      });
+    }
+  }
+
+  // Handle clicks on search suggestions
+  suggestionsContainer.on('click', '.search-suggestion', function() {
+    var suggestionText = $(this).text();
+    searchInput.val(suggestionText);
+    suggestionsContainer.html('');
+    $('#search-form').submit();
+  });
+
+  // Trigger search on keyup event
+  searchInput.on('keyup', function(event) {
+    if (event.key === 'Enter') {
+      clearTimeout(typingTimer);
+      getSearchResults();
+    }
+  });
+});
+
+
+      </script>
     <div class="row">
     <div class="col-sm-12">
     <div class="card card-table">
@@ -255,6 +303,9 @@
                     <th>Nummat</th>
                     <th>Nom</th>
                     <th>Semestre</th>
+                    <th>CM</th>
+                    <th>TD</th>
+                    <th>TP</th>
 
                     <th>Actions</th>
                 </tr>
@@ -264,7 +315,10 @@
         <tr>
           <td>{{ matiere.Nummat }}</td>
           <td>{{ matiere.Mat }}</td>
-          <td>{{ matiere.Semestre }}</td>
+          <td>{{ matiere.Sem.NSem }}</td>
+          <td>{{ matiere.CM }}</td>
+          <td>{{ matiere.TD }}</td>
+          <td>{{ matiere.TP }}</td>
 
           
                         <td>

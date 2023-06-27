@@ -54,6 +54,20 @@
   top: 290px;
   left: 340px;
 }
+
+
+
+
+
+.form-inline {
+        display: flex;
+        align-items: center;
+    }
+
+    .form-inline select {
+        margin-right: 10px;
+    }
+
 </style>
 
 
@@ -79,36 +93,27 @@
 </a>
 </div>
 
-<a class="mobile_btn" id="mobile_btn">
-<i class="fas fa-bars"></i>
-</a>
-<a href="/export_content">Exporter</a>
+
 
 <ul class="nav user-menu">
 
 
-    <form method="post" action="{% url 'index' %}">
+    <form method="post" action="{% url 'index' %}" class="form-inline">
         {% csrf_token %}
-        <select name="annee" id="annee">
+        <select name="annee" id="annee" class="form-control">
             {% for annee in Annees %}
                 <option value="{{ annee.annee }}" {% if annee_selectionnee == annee.annee %}selected{% elif annee_max == annee.annee %}selected{% endif %}>{{ annee.annee }}</option>
             {% endfor %}
         </select>
-        
-        
-        <select name="Semestre" id="Semestre">
+    
+        <select name="Semestre" id="Semestre" class="form-control">
             {% for semestre in Semestre %}
                 <option value="{{ semestre }}" {% if semestre_selectionne == semestre %}selected{% endif %}>{{ semestre }}</option>
             {% endfor %}
         </select>
-       
-        <button type="submit"  class="btn btn-sm bg-danger-light" >
-           <i class="fas fa-sync-alt"></i> 
-          </button>
-
-          
-          
-</form>
+    
+        <button type="submit" class="btn btn-sm bg-danger-light"><i class="fas fa-sync-alt"></i></button>
+    </form>
 
         <li class="nav-item dropdown language-drop me-2">
             <a href="#" class="dropdown-toggle nav-link header-nav-list" data-bs-toggle="dropdown">
@@ -235,6 +240,7 @@
             <li>
                 <a href="/generer_semaine"> <span>Suivi des cours</span></a>
                 <a href="/matSuivie"> <span>Suivi des Matieres</span></a>
+                <a href="/professeurs"> <span>Gestion du Salaire</span></a>
                 </li>
               
         
@@ -348,7 +354,11 @@
                   <div>
         
 <div  class="col-10 col-lg-4 col-xl-3 d-flex">
-<div class="card flex-fill comman-shadow">
+
+    <div >
+        {{ plot_div|safe }}
+    </div>
+<!-- <div class="card flex-fill comman-shadow">
 <div class="card-header">
 <div class="row align-items-center">
 <div class="col-12">
@@ -367,10 +377,10 @@
 </div>
 </div>
 </div>
-</div>
+</div> -->
 </div>
 
-<div id="s" class="col-10 col-lg-4 col-xl-3 d-flex">
+<!-- <div id="s" class="col-10 col-lg-4 col-xl-3 d-flex">
     <div class="card flex-fill comman-shadow">
     <div class="card-header">
     <div class="row align-items-center">
@@ -391,9 +401,10 @@
     </div>
     </div>
     </div>
-    </div>
+    </div> -->
 
 </div>
+
 
 
 </div>

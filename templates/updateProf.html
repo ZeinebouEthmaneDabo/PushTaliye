@@ -184,122 +184,107 @@
   
 
 
-<div class="page-wrapper">
-<div class="content container-fluid">
-
-<div class="page-header">
-<div class="row align-items-center">
-<div class="col">
-<h3 class="page-title">Ajouter un Professeurs</h3>
-<ul class="breadcrumb">
-<li class="breadcrumb-item active"><a href="/Listeprof">Retour au liste</a></li>
-</ul>
-</div>
-</div>
-</div>
-
-<div class="row">
-<div class="col-sm-12">
-<div class="card">
-<div class="card-body">
-  <form method="post" class="form-inline">
-    {% csrf_token %}
-<div class="row">
-<div class="col-12">
-<h5 class="form-title"><span>Information</span></h5>
-</div>
-<div class="col-12 col-sm-4">
-<div class="form-group local-forms">
-  <div class="form-group mr-sm-2 ">
-    <label for="{{ form.Matricule.id_for_label }}" ><span class="login-danger">*</span>Matricule</label>
-    {{ form.Matricule }}
-  </div>
-</div>
-</div>
-<div class="col-12 col-sm-4">
-<div class="form-group local-forms">
-  <div class="form-group mr-sm-2x">
-    <label for="{{ form.Nom.id_for_label }}"><span class="login-danger">*</span>Nom</label>
-    {{ form.Nom }}
-  </div>
-</div>
-</div>
-<div class="col-12 col-sm-4">
-<div class="form-group local-forms">
-  <div class="form-group mr-sm-2x">
-    <label for="{{ form.Nodep.id_for_label }}"><span class="login-danger">*</span>Nodep</label>
-    {{ form.Nodep}}
-  </div>
-</div>
-</div>
-
-<div class="col-12 col-sm-4">
-  <div class="form-group local-forms">
-    <div class="form-group mr-sm-2x">
-      <label for="{{ form.Type.id_for_label }}"><span class="login-danger">*</span>Type</label>
-      {{ form.Type }}
-    </div>
-  </div>
-  </div>
-
-  <div class="col-12 col-sm-4">
-    <div class="form-group local-forms">
-      <div class="form-group mr-sm-2x">
-        <label for="{{ form.Telephone.id_for_label }}"><span class="login-danger">*</span>Telephone</label>
-        {{ form.Telephone}}
-      </div>
-    </div>
-    </div>
-
-
-
-    <div class="col-12 col-sm-4">
-      <div class="form-group local-forms">
-        <div class="form-group mr-sm-2x">
-          <label for="{{ form.Email.id_for_label }}"><span class="login-danger">*</span>Email</label>
-          {{ form.Email}}
-        </div>
-      </div>
-      </div>
-
-
-
-      <div class="col-12 col-sm-4">
-        <div class="form-group local-forms">
-          <div class="form-group mr-sm-2x">
-            <label for="{{ form.Sexe.id_for_label }}"><span class="login-danger">*</span>Sexe</label>
-            {{ form.sexe}}
+  <div class="page-wrapper">
+    <div class="content container-fluid">
+      <div class="page-header">
+        <div class="row align-items-center">
+          <div class="col">
+            <h3 class="page-title">Modifier un Professeur</h3>
+            <ul class="breadcrumb">
+              <li class="breadcrumb-item active"><a href="/Listeprof">Retour à la liste</a></li>
+            </ul>
           </div>
         </div>
-        </div> 
-        
-        <div class="col-12 col-sm-4">
-          <div class="form-group local-forms">
-            <div class="form-group mr-sm-2x">
-              <label for="{{ form.Grade.id_for_label }}"><span class="login-danger">*</span>Grade</label>
-              {{ form.Grade}}
+      </div>
+  
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="card">
+            <div class="card-body">
+              <form method="post" class="form-inline">
+                {% csrf_token %}
+                <div class="row">
+                  <div class="col-12">
+                    <h5 class="form-title"><span>Informations</span></h5>
+                  </div>
+                  <div class="col-12 col-sm-4">
+                    <div class="form-group local-forms">
+                      <div class="form-group mr-sm-2">
+                        <label for="{{ form.NNI.id_for_label }}"><span class="login-danger">*</span>NNI</label>
+                        {{ form.NNI }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 col-sm-4">
+                    <div class="form-group local-forms">
+                      <div class="form-group mr-sm-2">
+                        <label for="{{ form.Nom.id_for_label }}"><span class="login-danger">*</span>Nom</label>
+                        {{ form.Nom }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 col-sm-4">
+                    <div class="form-group local-forms">
+                      <div class="form-group mr-sm-2">
+                        <label for="{{ form.Nodep.id_for_label }}"><span class="login-danger">*</span>Nodep</label>
+                        {{ form.Nodep }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 col-sm-4">
+                    <div class="form-group local-forms">
+                      <div class="form-group mr-sm-2">
+                        <label for="{{ form.Type.id_for_label }}"><span class="login-danger">*</span>Type</label>
+                        {{ form.Type }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 col-sm-4">
+                    <div class="form-group local-forms">
+                      <div class="form-group mr-sm-2">
+                        <label for="{{ form.Telephone.id_for_label }}"><span class="login-danger">*</span>Téléphone</label>
+                        {{ form.Telephone }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 col-sm-4">
+                    <div class="form-group local-forms">
+                      <div class="form-group mr-sm-2">
+                        <label for="{{ form.Email.id_for_label }}"><span class="login-danger">*</span>Email</label>
+                        {{ form.Email }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 col-sm-4">
+                    <div class="form-group local-forms">
+                      <div class="form-group mr-sm-2">
+                        <label for="{{ form.sexe.id_for_label }}"><span class="login-danger">*</span>Sexe</label>
+                        {{ form.sexe }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 col-sm-4">
+                    <div class="form-group local-forms">
+                      <div class="form-group mr-sm-2">
+                        <label for="{{ form.Grade.id_for_label }}"><span class="login-danger">*</span>Grade</label>
+                        {{ form.Grade }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="student-submit">
+                      <button type="submit" class="btn btn-primary">Modifier</button>
+                    </div>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
-          </div>    
-
-
-
-
-<div class="col-12">
-<div class="student-submit">
-  <button type="submit" class="btn btn-primary">Update Professeurs</button>
-</div>
-</div>
-</div>
-</form>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-
-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
 
 
 <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>

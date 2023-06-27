@@ -214,4 +214,8 @@ class Cours(models.Model):
     annee = models.ForeignKey(AnneeEnCours, on_delete=models.CASCADE) 
 
 
-    
+class Tarification(models.Model):
+    CM = models.IntegerField()
+    TD = models.IntegerField()
+    TP = models.IntegerField()
+    PR = models.IntegerField()

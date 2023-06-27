@@ -7,7 +7,7 @@ import zipfile
 from django import forms
 
 from django.urls import reverse
-from . models import DEPART, Matieres, Profil, Salles, Professeurs, EmploisCours, Horaire, Jours, Semestre,AnneeEnCours,Semaine,DateJour
+from . models import DEPART, Matieres, Profil, Salles, Professeurs, EmploisCours, Horaire, Jours, Semestre,AnneeEnCours,Semaine,DateJour, Tarification
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -256,6 +256,10 @@ def salle(request):
     return render(request, 'salle.html')
 
 from django.db.models import Max
+import plotly.graph_objects as go
+from plotly.offline import plot
+
+
 @login_required
 @cache_control(no_cache=True, must_revalidate=True,no_store=True)
 
@@ -276,9 +280,47 @@ def index(request):
     semestre_selectionne = request.session.get("semestre_selectionne")
     
     annee_max = AnneeEnCours.objects.aggregate(max_annee=Max('annee'))['max_annee']
-    return render(request, 'index.html', {'count': count, 'countp': countp, 'countd': countd, 'countf': countf, 'Annees': Annees, 'Semestre': Semestres, 'annee_selectionnee': annee_selectionnee, 'semestre_selectionne': semestre_selectionne, 'annee_max': annee_max})
 
+    # Retrieve data for the graph
+    data = Salles.objects.all()
+    labels = [s.NomSalles for s in data]
+    values = [s.CapSal for s in data]
 
+    bar_color = 'rgb(7, 81, 181)'  # Specify the color of the bars
+
+    fig = go.Figure(data=[go.Bar(
+        x=labels,
+        y=values,
+        marker=dict(color=bar_color, line=dict(color='rgb(26, 35, 126)', width=1.5)),  # Apply color and border to the bars
+        opacity=0.8,  # Set the opacity of the bars
+        textposition='auto'  # Set the position of the value labels
+    )])
+
+    fig.update_layout(
+        title='Salles Capacities',
+        xaxis=dict(
+            title='Nom Salles',
+            title_font=dict(size=14),
+            tickfont=dict(size=12)
+        ),
+        yaxis=dict(
+            title='Capacities',
+            title_font=dict(size=14),
+            tickfont=dict(size=12)
+        ),
+        plot_bgcolor='white',
+        font=dict(
+            family='Arial',
+            color='black',
+            size=12
+        ),
+        width=500,  # Set the width of the graph
+        height=400  # Set the height of the graph
+    )
+
+    plot_div = plot(fig, output_type='div')
+
+    return render(request, 'index.html', {'count': count, 'countp': countp, 'countd': countd, 'countf': countf, 'Annees': Annees, 'Semestre': Semestres, 'annee_selectionnee': annee_selectionnee, 'semestre_selectionne': semestre_selectionne, 'annee_max': annee_max, 'plot_div': plot_div})
 
 @login_required
 @cache_control(no_cache=True, must_revalidate=True,no_store=True)
@@ -365,7 +407,7 @@ def deleteF(request, codeF):
 def homeF(request):
     codeProfil = request.GET.get('codeProfil', '')
     LibelleProfil = request.GET.get('LibelleProfil', '')
-    Niv = request.GET.get('Niv', '')
+    Niv__Noniv = request.GET.get('Niv__Noniv', '')  # Corrected parameter name
     NbEtudlns = request.GET.get('NbEtudlns', '')
 
     queryset = Profil.objects.all()
@@ -374,8 +416,8 @@ def homeF(request):
         queryset = queryset.filter(codeProfil__icontains=codeProfil)
     if LibelleProfil:
         queryset = queryset.filter(LibelleProfil__icontains=LibelleProfil)
-    if Niv:
-        queryset = queryset.filter(Niv__Noniv__icontains=Niv)
+    if Niv__Noniv:  # Corrected field name
+        queryset = queryset.filter(Niv__Noniv__icontains=Niv__Noniv)
     if NbEtudlns:
         queryset = queryset.filter(NbEtudlns__icontains=NbEtudlns)
 
@@ -528,13 +570,17 @@ def deleteProf(request, matricule):
     prof.delete()
     return redirect("/Listeprof")
 
+
+from django.shortcuts import render, get_object_or_404
+from .models import Profil, Matieres
 @login_required
 @cache_control(no_cache=True, must_revalidate=True,no_store=True)
 def mat(request, filiere_id):
-    Semestre_selectionnee =request.session.get("semestre_selectionne")
+    semestre_selectionne = request.session.get("semestre_selectionne")
     filiere = get_object_or_404(Profil, codeProfil=filiere_id)
-    matieres = Matieres.objects.filter(Noprfl=filiere_id,Sem__type=Semestre_selectionnee)
-    context = {"Profil": filiere, "Matieres": matieres}
+    search_query = request.GET.get('Mat', '')  # Get the value of the 'Mat' parameter from the query string
+    matieres = Matieres.objects.filter(Noprfl=filiere_id, Sem__type=semestre_selectionne, Mat__icontains=search_query)
+    context = {"Profil": filiere, "Matieres": matieres, "search_query": search_query}
     return render(request, "filiereProfil.html", context)
 
 
@@ -598,34 +644,6 @@ def addc(request, filiere_id):
             
             salle = form.cleaned_data.get("salle")
 
-            existing_cours_prof = EmploisCours.objects.filter(
-                Matricule=matricule, Cd_Horaire=cd_horaire, NumJour=num_jour
-            ).exists()
-
-            if existing_cours_prof:   
-                form.add_error(
-                    None, "Ce professeur occupe déjà un cours à cette heure."
-                )
-
-            existing_cours_salle = EmploisCours.objects.filter(
-                Cd_Horaire=cd_horaire, NumJour=num_jour, salle=salle
-            ).exists()
-
-            if existing_cours_salle:
-                form.add_error(None, "Cette salle est déjà occupée à ce moment-là.")
-
-            existing_cours_date = EmploisCours.objects.filter(
-                Cd_Horaire=cd_horaire, NumJour=num_jour, NOPRFL_id=filiere_id
-            ).exists()
-
-            if existing_cours_date:
-                form.add_error(
-                    None, "Cette date et heure sont déjà occupées pour cette filière."
-                )
-
-            if existing_cours_prof or existing_cours_salle or existing_cours_date:
-                context = {"form": form}
-                return render(request, "addc.html", context=context, status=400)
 
             cours.save()
             return redirect("/affichCours/{0}".format(filiere_id)) 
@@ -801,45 +819,91 @@ def Emplois(request, code_profil):
         'semestre': Se
     }
     return render(request, 'Emplois.html', context)
-
-
-def EmploisSalles(request,salle):
-   
+def ListeEmplois(request):
+    # Récupérer l'année en cours
     annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
     annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee) 
     derniere_annee = AnneeEnCours.objects.order_by('-annee').first()
+    type_selectionne = request.session.get("semestre_selectionne")
+
+    # Récupérer toutes les filières
+    filieres = Profil.objects.all()
+    se=[]
+    c_j_h = []
+    for filiere in filieres:
+        niveau_filiere = filiere.Niv
+        semestre = Semestre.objects.get(Niv=niveau_filiere,type=type_selectionne)
+        Se = semestre.NSem
+        anneec = annee_obj.annee if annee_obj else date.today().year
+        # Calculer l'année précédente
+        annee_precedente = anneec - 1
+        
+        jours = Jours.objects.all() 
+        heures = Horaire.objects.all()
+        # Récupérer tous les profils de la filière
+        
+
+        cours = EmploisCours.objects.filter(NOPRFL=filiere, annee=annee_obj, Semestre=semestre)
+        for cours_item in cours:
+            if cours_item.Cd_Horaire in heures and cours_item.NumJour in jours:
+                    c_j_h.append((filiere, cours_item.Mat, cours_item.NumJour, cours_item.Cd_Horaire, cours_item.Matricule, cours_item.salle))
+                    
+
+    context = {
+        'c_j_h': c_j_h,
+        'jours': jours,
+        'heures': heures,
+        'filieres': filieres,
+        'annee_en_cours': anneec,
+        'annee_precedente': annee_precedente,
+        'semestre': Se,
+    }
+
+    # Rendre la template pour afficher les emplois de toutes les filières
+    return render(request, 'ListeEmplois.html', context)
+
+
+
+def ListeEmpSalles(request):
+    salles=Salles.objects.all()
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee) 
+    derniere_annee = AnneeEnCours.objects.order_by('-annee').first()
+ 
     anneec = annee_obj.annee if annee_obj else date.today().year
   
     # Calculer l'année précédente
     annee_precedente = anneec - 1
     type_selectionne = request.session.get("semestre_selectionne")
-    # Récupérer le profil correspondant
-    salle = Salles.objects.get(NomSalles=int(salle))
-    jours = Jours.objects.all()
-    heures = Horaire.objects.all()
-    semestres = Semestre.objects.filter(type=type_selectionne)
-    semestre_list = [semestre.NSem for semestre in semestres]
-
-
+    
+    
     c_j_h = []
-    cours = EmploisCours.objects.filter(salle=salle,annee= annee_obj,Semestre__type=type_selectionne)
-   
-    for cours_item in cours:
-        if cours_item.Cd_Horaire in heures and cours_item.NumJour in jours:
-            c_j_h.append((cours_item.Mat, cours_item.NumJour, cours_item.Cd_Horaire, cours_item.Matricule, cours_item.NOPRFL))
+    for salle0 in salles:
+     
+        jours = Jours.objects.all()
+        heures = Horaire.objects.all()
+        semestres = Semestre.objects.filter(type=type_selectionne)
+        semestre_list = [semestre.NSem for semestre in semestres]
+        cours = EmploisCours.objects.filter(salle=salle0, annee=annee_obj, Semestre__type=type_selectionne)
+
+        for cours_item in cours:
+           if cours_item.Cd_Horaire in heures and cours_item.NumJour in jours:
+             c_j_h.append((salle0, cours_item.Mat, cours_item.NumJour, cours_item.Cd_Horaire, cours_item.Matricule, cours_item.NOPRFL))
+
             
     context = {
         'c_j_h': c_j_h,
         'jours': jours,
         'heures': heures,
-        'Salles': salle,
+        'salles': salles,
         'annee_en_cours': anneec,
         'annee_precedente': annee_precedente,
         'semestre':semestre_list
     }
-    return render(request, 'EmploisSalle.html', context)
+    return render(request, "ListeEmpSalles.html", context) 
 
-def EmploisProf(request,nni):
+def ListeEmpProfs(request):
+    profs =Professeurs.objects.all()
     annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
     annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee) 
     derniere_annee = AnneeEnCours.objects.order_by('-annee').first()
@@ -848,324 +912,47 @@ def EmploisProf(request,nni):
     annee_precedente = anneec - 1
     # Récupérer le profil correspondant
     type_selectionne = request.session.get("semestre_selectionne")
-    prof =Professeurs.objects.get(NNI=nni)
-    jours = Jours.objects.all()
-    heures = Horaire.objects.all()
-    semestres = Semestre.objects.filter(type=type_selectionne)
-    semestre_list = [semestre.NSem for semestre in semestres]
     c_j_h = []
-    cours = EmploisCours.objects.filter(Matricule=prof,annee=annee_obj,Semestre__type=type_selectionne)
-    for cours_item in cours:
-        if cours_item.Cd_Horaire in heures and cours_item.NumJour in jours:
-            c_j_h.append((cours_item.Mat, cours_item.NumJour, cours_item.Cd_Horaire, cours_item.salle, cours_item.NOPRFL))
+    for prof in profs :
+       jours = Jours.objects.all()
+       heures = Horaire.objects.all()
+       semestres = Semestre.objects.filter(type=type_selectionne)
+       semestre_list = [semestre.NSem for semestre in semestres]
+       cours = EmploisCours.objects.filter(Matricule=prof,annee=annee_obj,Semestre__type=type_selectionne)
+       for cours_item in cours:
+          if cours_item.Cd_Horaire in heures and cours_item.NumJour in jours:
+             c_j_h.append((prof,cours_item.Mat, cours_item.NumJour, cours_item.Cd_Horaire, cours_item.salle, cours_item.NOPRFL))
 
     context = {
         'c_j_h': c_j_h,
         'jours': jours,
         'heures': heures,
-        'Profs': prof,
+        'Profs':  profs ,
         'annee_en_cours': anneec,
         'annee_precedente': annee_precedente,
         'semestre':semestre_list
 
     }
-    return render(request, 'EmploisProf.html', context)
+    return render(request, 'ListeEmpProfs.html', context)
 
-def ListeEmpProfs(request):
-    # Passer les données à la template
-    profs=Professeurs.objects.all()
 
-    context = {
-        "Profs": profs,
-    }
 
-    # Rendre la template pour afficher les emplois de la filière
-    return render(request, "ListeEmpProfs.html", context) 
+# def ListeEmpSalles(request):
+#     # Passer les données à la template
+#     salles=Salles.objects.all()
 
-def ListeEmpSalles(request):
-    # Passer les données à la template
-    salles=Salles.objects.all()
+#     context = {
+#         "Salles": salles,
+#     }
 
-    context = {
-        "Salles": salles,
-    }
-
-    # Rendre la template pour afficher les emplois de la filière
-    return render(request, "ListeEmpSalles.html", context) 
+#     # Rendre la template pour afficher les emplois de la filière
+#     return render(request, "ListeEmpSalles.html", context) 
 
 from django.contrib.auth.models import User
 
 def display_usernames(request):
     users = User.objects.all()  # Retrieve all user objects from the database
     return render(request, 'listrespo.html', {'users': users})
-
-
-
-
-from django.http import HttpResponse
-from django.template.loader import get_template
-from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib import colors
-from io import BytesIO
-from django.template.loader import render_to_string
-from xhtml2pdf import pisa
-from django.http import HttpResponse
-from io import BytesIO
-from django.template.loader import render_to_string
-from xhtml2pdf import pisa
-from django.http import HttpResponse
-from bs4 import BeautifulSoup
-
-
-
-
-def export_to_pdf(request, code_profil):
-    profil = get_object_or_404(Profil, codeProfil=code_profil)
-    annee_en_cours = AnneeEnCours.objects.first()
-    annee = annee_en_cours.annee if annee_en_cours else date.today().year
-    annee_precedente = annee - 1
-    jours = Jours.objects.all()
-    heures = Horaire.objects.all()
-
-    c_j_h = []
-    cours = EmploisCours.objects.filter(NOPRFL=profil)
-    for cours_item in cours:
-        if cours_item.Cd_Horaire in heures and cours_item.NumJour in jours:
-            c_j_h.append(
-                (
-                    cours_item.Mat,
-                    cours_item.NumJour,
-                    cours_item.Cd_Horaire,
-                    cours_item.Matricule,
-                    cours_item.salle,
-                )
-            )
-
-    # Rendu du template HTML avec les données
-    context = {
-        'annee_en_cours': annee,
-        'annee_precedente': annee_precedente,
-        "profil": profil,
-        "jours": jours,
-        "heures": heures,
-        "c_j_h": c_j_h,
-    }
-    html = render_to_string("Emplois.html", context, request=request)
-    html = '<meta charset="utf-8">' + '<link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">' + html
-
-    # Extract the desired <div> content
-    soup = BeautifulSoup(html, "html.parser")
-    div_content = soup.find("div", class_="row").prettify()
-    style = """
-   
- <style>
-
-  .arabic {
-    font-family: 'Amiri', Arial, sans-serif;
-    
-  }
-
-  p {
-    font-family: 'Amiri', Arial, sans-serif;
-    text-align: center;
-  }
-
-  h1 {
-    color: #333;
-  }
-
-table {
-    border-collapse: collapse;
-    width: 100%;
-}
-
-th, td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    
-    text-align: center;
-    
-}
-td{
-    padding-right:15px;
-    padding-buttom:10px;
-    padding-top:10px;
-}
- #p{
-  position: absolute;
-  top: 10px;
-  left: 10px;
-    }
-
-    #p{
-  position: absolute;
-  top: 10px;
-  right:10px;
-    }
-
-</style>
-"""
-
-
-    # Ajouter les liens vers les feuilles de style CSS avant le contenu de la <div>
-    div_content = style + div_content
-
-    # Nom du fichier PDF incluant le libellé de la filière
-    filename = f"emplois_{profil.LibelleProfil}.pdf"
-
-    response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
-
-    # Génération du PDF à partir du contenu HTML
-    pdf = pisa.CreatePDF(div_content, dest=response, encoding="utf-8")
-
-    if not pdf.err:
-        return response
-
-    return HttpResponse(f'Erreur lors de la génération du PDF pour le profil : {code_profil}')
-
-    
-def ListeEmplois(request):
-    # Passer les données à la template
-    filiere = Profil.objects.all()
-
-    context = {
-        "filieres": filiere,
-    }
-
-    # Rendre la template pour afficher les emplois de la filière
-    return render(request, "ListeEmplois.html", context) 
-
-
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.template.loader import render_to_string
-from bs4 import BeautifulSoup
-from xhtml2pdf import pisa
-from .models import Jours, Horaire, EmploisCours
-
-# Exportation de plusieurs Emplois
-
-from django.http import HttpResponse
-from django.shortcuts import render
-from django.urls import reverse
-
-from django.http import HttpResponse
-from django.template.loader import get_template
-from django.template import Context
-from django.conf import settings
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
-
-import pdfkit
-from bs4 import BeautifulSoup
-from django.template.loader import render_to_string
-from xhtml2pdf import pisa
-
-from django.http import HttpResponse
-from django.template.loader import get_template
-from django.template import Context
-from django.conf import settings
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
-
-import pdfkit
-from bs4 import BeautifulSoup
-from django.template.loader import render_to_string
-from xhtml2pdf import pisa
-
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
-from django.template.loader import render_to_string
-from django.urls import reverse
-from bs4 import BeautifulSoup
-from xhtml2pdf import pisa
-from .models import Profil, Jours, Horaire, EmploisCours
-from io import BytesIO
-from django.http import HttpResponse
-from django.template.loader import render_to_string
-from xhtml2pdf import pisa
-from bs4 import BeautifulSoup
-
-from io import BytesIO
-from django.http import HttpResponse
-from django.template.loader import render_to_string
-from xhtml2pdf import pisa
-from bs4 import BeautifulSoup
-
-
-from django.http import HttpResponse
-from django.template.loader import render_to_string
-from reportlab.pdfgen import canvas
-from io import BytesIO
-from bs4 import BeautifulSoup
-
-
-def export_to_pdfCollectif(request):
-    code_filieres = request.POST.getlist('filieres')  # Récupérer la liste des codes de filières depuis la requête POST
-
-    # Créer un buffer pour le PDF collectif
-    buffer = BytesIO()
-
-    # Créer le document PDF collectif
-    pdf = canvas.Canvas(buffer)
-
-    # Parcourir les codes de filières
-    for code_filiere in code_filieres:
-        profil = get_object_or_404(Profil, codeProfil=code_filiere)
-        jours = Jours.objects.all()
-        heures = Horaire.objects.all()
-
-        c_j_h = []
-        cours = EmploisCours.objects.filter(NOPRFL=profil)
-        for cours_item in cours:
-            if cours_item.Cd_Horaire in heures and cours_item.NumJour in jours:
-                c_j_h.append(
-                    (
-                        cours_item.Mat,
-                        cours_item.NumJour,
-                        cours_item.Cd_Horaire,
-                        cours_item.Matricule,
-                        cours_item.salle,
-                    )
-                )
-
-        # Rendu du template HTML avec les données
-        context = {
-            "profil": profil,
-            "jours": jours,
-            "heures": heures,
-            "c_j_h": c_j_h,
-        }
-        html = render_to_string("Emplois.html", context, request=request)
-        html = '<meta charset="utf-8">' + html
-        # Extract the desired <div> content
-        soup = BeautifulSoup(html, "html.parser")
-        div_content = soup.find("div", class_="row").prettify()
-
-        # Dessiner le contenu de chaque filière sur le document PDF collectif
-        pdf.drawString(100, 700, f"Emplois - Filière: {code_filiere}")
-        pdf.setFont("Helvetica", 12)
-        pdf.drawString(100, 650, div_content)
-        pdf.showPage()
-
-    # Finaliser le document PDF collectif
-    pdf.save()
-
-    # Obtenir le contenu du PDF à partir du buffer
-    pdf_content = buffer.getvalue()
-
-    # Fermer le buffer
-    buffer.close()
-
-    # Retourner la réponse HTTP avec le PDF collectif
-    response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = 'attachment; filename="emplois_collectifs.pdf"'
-    response.write(pdf_content)
-    return response
 
 
 
@@ -1356,19 +1143,41 @@ def generer_semaine(request):
 
 
 def liste_jours(request, semaine_id):
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee) 
+    derniere_annee = AnneeEnCours.objects.order_by('-annee').first()
+    anneec = annee_obj.annee if annee_obj else date.today().year
+    parite = request.session.get('semestre_selectionne')
+    matsoir_options = Horaire.objects.values_list('MatSoir', flat=True).distinct()
+
+    # Calculer l'année précédente
+    annee_precedente = anneec - 1
     semaine = Semaine.objects.get(id=semaine_id)
     jours = Jours.objects.all()
-    context = {'semaine': semaine, 'jours': jours}
+    context = {
+        'semaine': semaine, 
+        'jours': jours,
+        'annee_en_cours': anneec,
+        'annee_precedente': annee_precedente,
+        'parite': parite,
+        'matsoir_options': matsoir_options,
+    }
     return render(request, 'liste_jours.html', context)
 
-def afficher_cours_jour(request, semaine_id, jour_id):
+def afficher_cours_jour(request, semaine_id, jour_id, matSoir):
+
     semaine = Semaine.objects.get(id=semaine_id)
     jour = Jours.objects.get(NumJour=jour_id)
-    cours_jour = Cours.objects.filter(semaine=semaine, NumJour=jour)
-
+    cours_jour = Cours.objects.filter(semaine=semaine, NumJour=jour, cd_horaire__MatSoir=matSoir).order_by('cd_horaire')
+    datei=DateJour.objects.get(Semaine=semaine,NumJour=jour)
+    dat=datei.DateJour
     cours_html = ''
+    cours_html += '<div class="hi">'
+    cours_html += '<p class="helo">Date du jour : ' + str(dat) + '</p>'  # Add the DateJour paragraph
+    cours_html += '</div>'
     if cours_jour:
         cours_html += '<div class="container">'
+        
         cours_html += '<link rel="stylesheet" href="{% static \'assets/plugins/bootstrap/css/bootstrap.min.css\' %}">'
         cours_html += '<link rel="stylesheet" href="{% static \'assets/plugins/feather/feather.css\' %}">'
         cours_html += '<link rel="stylesheet" href="{% static \'assets/plugins/icons/flags/flags.css\' %}">'
@@ -1381,44 +1190,51 @@ def afficher_cours_jour(request, semaine_id, jour_id):
         cours_html += '<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">'
     
         cours_html += '<div class="table-responsive">'
-        cours_html += '<table class="table">'
+        cours_html += '<table class="table" id="cours-table">'
+
+
         cours_html += '<thead>'
-        cours_html += '<tr>'
-        cours_html += '<th>Matricule</th>'
-        cours_html += '<th>Téléphone</th>'
-        cours_html += '<th>NOPRFL</th>'
-        cours_html += '<th>Mat</th>'
-        cours_html += '<th>Cd_Horaire</th>'
+        cours_html += '<tr>' 
+        cours_html += '<th>Filiere</th>'
+        cours_html += '<th>Matiere</th>'
+        cours_html += '<th>Professeur</th>'
+        cours_html += '<th>Télé</th>'
         cours_html += '<th>Salle</th>'
-        cours_html += '<th>CDDateJour</th>'
-        cours_html += '<th>Vl</th>'
+        
+        cours_html += '<th>Horaire</th>'
+       
+        cours_html += '<th>Date Jour</th>'
+        cours_html += '<th>Signature</th>'
         cours_html += '</tr>'
         cours_html += '</thead>'
         cours_html += '<tbody>'
         for cours in cours_jour:
             cours_html += '<tr>'
-            cours_html += '<td> ' + str(cours.matricule.Nom) + '</td>'
-            cours_html += '<td> ' + str(cours.matricule.Telephone) + '</td>'
             cours_html += '<td>' + str(cours.noprfl.LibelleProfil) + '</td>'
             cours_html += '<td> ' + str(cours.mat.Mat) + '</td>'
-            cours_html += '<td> ' + str(cours.cd_horaire.HCours) + '</td>'
+            cours_html += '<td> ' + str(cours.matricule.Nom) + '</td>'
+            cours_html += '<td> ' + str(cours.matricule.Telephone) + '</td>'
+            
             cours_html += '<td> ' + str(cours.salle.NomSalles) + '</td>'
+            cours_html += '<td> ' + str(cours.cd_horaire.HCours) + '</td>'
+            
             cours_html += '<td> ' + str(cours.CDDateJour.DateJour) + '</td>'
-            cours_html += '<td>' + ('fait' if cours.vl else '') + '</td>'
+            cours_html += '<td>' + ('') + '</td>'
 
 
             cours_html += '</tr>'
+           
         cours_html += '</tbody>'
         cours_html += '</table>'
     else:
       cours_html = '<p>Aucun cours disponible pour cette semaine et ce jour.</p>'
-
+   
     return HttpResponse(cours_html)
 
-def remplir_cours(request, semaine_id, jour_id):
+def remplir_cours(request, semaine_id, jour_id,matSoir):
     semaine = Semaine.objects.get(id=semaine_id)
     jour = Jours.objects.get(NumJour=jour_id)
-    cours = Cours.objects.filter(semaine=semaine, NumJour=jour)
+    cours = Cours.objects.filter(semaine=semaine,NumJour=jour,cd_horaire__MatSoir=matSoir)
 
     context = {'cours': cours}
     return render(request, 'remplir_cours.html', context)
@@ -1500,6 +1316,121 @@ def matSuivie(request):
 
     return render(request, 'Suivie_matieres.html', context)
 
+
+
+def professeurs_table(request):
+    professeurs = Professeurs.objects.all()
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    type_selectionne = request.session.get('semestre_selectionne')
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee)
+    anneec = annee_obj.annee if annee_obj else date.today().year
+  
+    # Calculer l'année précédente
+    annee_precedente = anneec - 1 
+    semestres = Semestre.objects.filter(type=type_selectionne)
+    semestre_list = [semestre.NSem for semestre in semestres]
+    matieres = Matieres.objects.filter(Sem__type=type_selectionne)
+    data = []
+    
+    for professeur in professeurs:
+        cm_count = Cours.objects.filter(matricule=professeur, vl=True, natcours='CM',annee=annee_obj,Semestre__type=type_selectionne).count()
+        td_count = Cours.objects.filter(matricule=professeur, vl=True, natcours='TD',annee=annee_obj,Semestre__type=type_selectionne).count()
+        tp_count = Cours.objects.filter(matricule=professeur, vl=True, natcours='TP',annee=annee_obj,Semestre__type=type_selectionne).count()
+        pr_count = Cours.objects.filter(matricule=professeur, vl=True, natcours='PR',annee=annee_obj,Semestre__type=type_selectionne).count()
+        
+        matieres = Cours.objects.filter(matricule=professeur).values_list('mat__Mat', flat=True).distinct()
+        matieres_list = list(matieres)
+        
+        data.append({
+            'id':professeur.NNI,
+            'nom': professeur.Nom,
+            'compte_bancaire': professeur.CompteBancaire,
+            'cm_count': cm_count,
+            'td_count': td_count,
+            'tp_count': tp_count,
+            'pr_count': pr_count,
+            'matieres': matieres_list,
+            })
+        context={
+            'annee':annee_selectionnee,
+            'annee_precedente':annee_precedente,
+            'semestres':semestre_list}
+    return render(request, 'professeurs_table.html', {'data': data,'context':context})
+
+from django.shortcuts import render, get_object_or_404
+from .models import Professeurs
+from django.shortcuts import render, get_object_or_404
+from .models import Professeurs
+
+def professeur_detail(request, professeur_id):
+    tarification = Tarification.objects.first() 
+    professeur = get_object_or_404(Professeurs, NNI=professeur_id)
+    annee_selectionnee = request.session.get("annee_selectionnee")  # Récupérer l'année depuis la variable de session
+    type_selectionne = request.session.get('semestre_selectionne')
+    annee_obj = AnneeEnCours.objects.get(annee=annee_selectionnee)
+    anneec = annee_obj.annee if annee_obj else date.today().year
+  
+    # Calculer l'année précédente
+    annee_precedente = anneec - 1 
+    semestres = Semestre.objects.filter(type=type_selectionne)
+    semestre_list = [semestre.NSem for semestre in semestres]
+    matieres = Matieres.objects.filter(Sem__type=type_selectionne)
+    # Get the selected date range from the request
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    cm_count = Cours.objects.filter(matricule=professeur, vl=True, natcours='CM', annee=annee_obj, Semestre__type=type_selectionne)
+    td_count = Cours.objects.filter(matricule=professeur, vl=True, natcours='TD', annee=annee_obj, Semestre__type=type_selectionne)
+    tp_count = Cours.objects.filter(matricule=professeur, vl=True, natcours='TP', annee=annee_obj, Semestre__type=type_selectionne)
+    pr_count = Cours.objects.filter(matricule=professeur, vl=True, natcours='PR', annee=annee_obj, Semestre__type=type_selectionne)
+    
+    # Filter the courses by the selected date range
+    if start_date and end_date:
+        cm_count = cm_count.filter(CDDateJour__DateJour__range=[start_date, end_date])
+        td_count = td_count.filter(CDDateJour__DateJour__range=[start_date, end_date])
+        tp_count = tp_count.filter(CDDateJour__DateJour__range=[start_date, end_date])
+        pr_count = pr_count.filter(CDDateJour__DateJour__range=[start_date, end_date])
+
+    cm_count = cm_count.count()
+    td_count = td_count.count()
+    tp_count = tp_count.count()
+    pr_count = pr_count.count()
+    total=cm_count+td_count +tp_count+pr_count 
+    # calcul de prix
+    prix_cm =  int(cm_count) * int(tarification.CM)
+    prix_td = int(td_count) * int(tarification.TD)
+    prix_tp =  int(tp_count) * int(tarification.TP)
+    prix_pr = int( pr_count) * int(tarification.PR)
+
+    totalPrix = prix_cm + prix_td+prix_tp+prix_pr
+    matieres = Cours.objects.filter(matricule=professeur,vl=True,annee=annee_obj, Semestre__type=type_selectionne).values_list('mat__Mat', flat=True).distinct()
+    matieres_list = list(matieres)
+
+    data = {
+        'nom': professeur.Nom,
+        'compte_bancaire': professeur.CompteBancaire,
+        'cm_count': cm_count,
+        'td_count': td_count,
+        'tp_count': tp_count,
+        'pr_count': pr_count,
+        'matieres': matieres_list,
+        'total':total,
+        'prix_cm':prix_cm,
+        'prix_td':prix_td,
+        'prix_tp':prix_tp,
+        'prix_pr':prix_pr,
+        'totalPrix':totalPrix
+    }
+
+    context = {
+        'annee': annee_selectionnee,
+        'annee_precedente': annee_precedente,
+        'semestres': semestre_list,
+        'start_date': start_date,
+        'end_date': end_date,
+    }
+
+    return render(request, 'professeur_detail.html', {'data': data, 'context': context})
 
 from django.shortcuts import render
 from .models import AnneeEnCours

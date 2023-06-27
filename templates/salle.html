@@ -230,6 +230,26 @@
       </div>
      
     </form>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script>
+        $(document).ready(function() {
+          var typingTimer;
+          var doneTypingInterval = 500; // In milliseconds (adjust as needed)
+          var searchInputs = $('#nom-salles-input, #cap-sal-input, #niv-input');
+      
+          searchInputs.on('input', function() {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(submitSearch, doneTypingInterval);
+          });
+      
+          function submitSearch() {
+            $('#search-form').submit();
+          }
+        });
+      </script>
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>

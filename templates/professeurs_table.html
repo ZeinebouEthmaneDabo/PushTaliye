@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 {% load static %}
@@ -8,7 +7,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-<title>Isca - Emp</title>
+<title>ISCAEMP - ISCAE</title>
 
 <link rel="shortcut icon" href="{% static 'assets/img/favicon.png' %}">
 
@@ -26,116 +25,15 @@
 <link rel="stylesheet" href="{% static 'assets/plugins/select2/css/select2.min.css' %}">
 
 <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
-<style>
-   
 
-        .arabic {
-          font-family: 'Amiri', Arial, sans-serif;
-          
-        }
-      
-        p {
-          font-family: 'Amiri', Arial, sans-serif;    text-align: center;
-        }
-  table {
+ 
 
-  border: solid 2px;
-  width: 100%;
-  border-collapse: collapse;
-  text-align: center;
-  table-layout: fixed; 
-  
-}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
 
-th{
-  padding: 15px;
-  padding-left: 20px;
-  border: 2px solid #ddd0dd;
-  text-align: center;
-} 
-td {
-  padding: 15px;
-  padding-left: 20px;
-  border: 2px solid #ddd0dd;
-  text-align: center;
-  height: 100px;
-  width: 100px; /* Largeur fixe des cellules */
-  
-  
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 
-}
-
-      
-      
-          #pf{
-        position: absolute;
-        top: 10px;
-        left: 10px;
-          }
-      
-          #pd{
-        position: absolute;
-        top: 10px;
-        right:10px;
-          }
-      
-          @media print {
-             body  * {
-            visibility: hidden;
-          }
-      
-          .row,
-          .row * {
-            visibility: visible;
-          }
-          .header {
-            display: none;
-        }
-        
-        .sidebar {
-            display: none;
-        }
-        
-        .page-wrapper {
-            margin-left: 0 !important;
-        }
-      
-          .row {
-            position: absolute;
-            left: 0;
-            top: 0;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-        
-        }
-  
-
-        .row > * {
-          page-break-inside: avoid;
-        }
-        @page {
-            margin: 0;
-            transform: scale(0.80);
-            transform-origin: top left;
-        }
-      }
-
-      #im{
-    background-color: rgb(81, 115, 250);
-    color: aliceblue;}
-     
-    #im:hover {
-    background-color: aliceblue; 
-    color:rgb(81, 115, 250);
-}
-
-
-
-      </style>
-
-
+<!-- Fichier JavaScript -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
 </head>
 <body>
@@ -292,96 +190,106 @@ td {
     </div>
     
 
-        
+
+
+
 
     <div class="page-wrapper">
         <div class="content container-fluid">
-            <div id="print-content">
-            <div class="row">
-             
-                    <div class="y">
-                  <div class="card p-3">
-                    <div class="col-sm-12">
-                      <div class="card-body">
-                        <div class="">
-                          <div id="pf">
-                            <p>Institut Supérieur de Comptabilité et</p>
-                            <p>d'Administration des Entreprises</p>
-                
-                          </div>
-                          <div id="pd">
-                            <p>المعهد العالي للمحاسبة و إدارة المؤسسات</p>
-                          </div>
-                        </div>
-
-                        <p class="arabic">Semestre: {{ semestre }} :السداسي</p>                        <div class="text-center">
-                          <img src="{% static 'assets/img/logo-iscae2.png' %}">
-                          <p class="arabic">Annees universitaire: {{ annee_en_cours }} - {{ annee_precedente }} :السنة الدراسية</p>
-                          <p class="arabic"><b>Emplois du Temps الجدول الزمني</b></p>
-                          <p class="arabic">Filiere: {{ profil.LibelleProfil }} :الشعبة</p>
-                        </div>
+        
+        <div class="page-header">
+        <div class="row align-items-center">
+        <div class="col">
+        <h3 class="page-title">Suivie matières</h3> <br>
       
-                        <table>
-                          <tr>
-                            <th>Heures/Jours</th>
-                            {% for jour in jours %}
-                            <th>{{ jour.NomJour }}</th>
-                            {% endfor %}
-                          </tr>
-                          {% for heure in heures %}
-                          <tr>
-                            <td>{{ heure.HCours }}</td>
-                            {% for jour in jours %}
-                            <td>
-                              {% for cour, num_jour, horaire, matricule, salle in c_j_h %}
-                              {% if num_jour == jour and horaire == heure %}
-                              <p>{{ cour.Mat }}</p>
-                              <p>{{ matricule.Nom }}</p>
-                              <p>salle: {{ salle.NomSalles }}</p>
-                              {% endif %}
-                              {% endfor %}
-                            </td>
-                            {% endfor %}
-                          </tr>
-                          {% endfor %}
-                        </table>
-                        </div>
-                      </div>
-                    </div>
-                </div>
-             
-          </div>
+        <ul class="breadcrumb">
+            <h6 class="">Semestres:{{ context.semestres}} /</h6> <br>
+            <h6>Annees universitaire: {{ context.annee }} - {{ context.annee_precedente }}</h6>
+        </ul>
         </div>
+        </div>
+        </div>
+  <form>
+    <div class="student-group-form">
+    <div class="row">
+    <div class="col-lg-3 col-md-6">
+    <div class="form-group">
+    <input type="text" name="q" class="form-control" placeholder=" ">
+    </div>
+    </div>
+    
 
+    
+    </div>
+    </div>
+  </form>
+    <div class="row">
+    <div class="col-sm-12">
+    <div class="card card-table">
+    <div class="card-body">
 
+    
+    <div class="page-header">
+    <div class="row align-items-center">
+    <div class="col">
+        {% block content %}  
+      
 
-<button id="im"  style="font-size: x-large;" class="btn btn-outline-primary me-2" onclick="printPage()"><i class="fas fa-download">  Imprimer</i></button>   
-<script>
-  function printPage() {
+    
+    <div class="table-responsive">
+    <table class="table border-0 star-student table-hover table-center mb-0 datatable table-striped">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Compte Bancaire</th>
+                <th>Nombre de CM</th>
+                <th>Nombre de TD</th>
+                <th>Nombre de TP</th>
+                <th>Nombre de PR</th>
+                <th>Matieres</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+            <tr>
+                <td>{{ item.nom }}</td>
+                <td>{{ item.compte_bancaire }}</td>
+                <td>{{ item.cm_count }}</td>
+                <td>{{ item.td_count }}</td>
+                <td>{{ item.tp_count }}</td>
+                <td>{{ item.pr_count }}</td>
+                <td>
+                    {% for matiere in item.matieres %}
+                    {{ matiere }}<br>
+                    {% endfor %}
+                </td>
+                <td>
+                    <a href="{% url 'professeur_detail' item.id %}">Voir la fiche</a> <!-- Lien vers la page de la fiche -->
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </table>
    
-      window.print();
-    
-    
-  }
-</script>
+    {% endblock %}
+    <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+   
+   <script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+   
+   <script src="{% static 'assets/js/feather.min.js' %}"></script>
+   
+   <script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+   
+   <script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
+   
+   <script src="{% static 'assets/js/script.js' %}"></script>
 
 
-
-
-
-
-
-
-<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
-
-<script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-
-<script src="{% static 'assets/js/feather.min.js' %}"></script>
-
-<script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
-
-<script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
-
-<script src="{% static 'assets/js/script.js' %}"></script>
 </body>
 </html>

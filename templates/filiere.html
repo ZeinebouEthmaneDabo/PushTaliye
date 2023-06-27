@@ -217,32 +217,61 @@ a.btn.btn-sm.bg-danger-light:hover i {
     <div class="page-header">
     <div class="row align-items-center">
     <div class="col">
-    <h3 class="page-title">profiles</h3>
+    <h3 class="page-title">Filieres</h3>
     <ul class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/salle">profiles</a></li>
-    <li class="breadcrumb-item active">Liste des profiles</li>
+    <li class="breadcrumb-item"><a href="/">Filieres</a></li>
+    <li class="breadcrumb-item active">Liste des Filieres</li>
     </ul>
     </div>
     </div>
     </div>
-  <form>
-    <div class="student-group-form">
-    <div class="row">
-    <div class="col-lg-3 col-md-6">
-    <div class="form-group">
-    <input type="text" name="q" class="form-control" placeholder=" ">
-    </div>
-    </div>
+    <form id="search-form">
+        <div class="student-group-form">
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="form-group">
+                        <input type="text" name="codeProfil" id="codeProfil-input" class="form-control" placeholder="Rechercher par code Profil" value="{{ request.GET.codeProfil }}">
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="form-group">
+                        <input type="text" name="LibelleProfil" id="LibelleProfil-input" class="form-control" placeholder="Rechercher par Libelle Profil" value="{{ request.GET.LibelleProfil }}">
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="form-group">
+                        <input type="text" name="Niv__Noniv" id="Niv__Noniv-input" class="form-control" placeholder="Rechercher par Niv__Noniv" value="{{ request.GET.Niv__Noniv }}">
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="form-group">
+                        <input type="text" name="NbEtudlns" id="NbEtudlns-input" class="form-control" placeholder="Rechercher par NbEtudlns" value="{{ request.GET.NbEtudlns }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
     
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var typingTimer;
+            var doneTypingInterval = 500; // In milliseconds (adjust as needed)
+            var searchInputs = $('#codeProfil-input, #LibelleProfil-input, #Niv__Noniv-input, #NbEtudlns-input');
+    
+            searchInputs.on('input', function() {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(submitSearch, doneTypingInterval);
+            });
+    
+            function submitSearch() {
+                $('#search-form').submit();
+            }
+        });
+    </script>
 
-    <div class="col-lg-2">
-    <div class="search-student-btn">
-    <button type="submit" class="btn btn-primary">Rechercher</button>
-    </div>
-    </div>
-    </div>
-    </div>
-  </form>
+
+
     <div class="row">
     <div class="col-sm-12">
     <div class="card card-table">
@@ -252,11 +281,11 @@ a.btn.btn-sm.bg-danger-light:hover i {
     <div class="page-header">
     <div class="row align-items-center">
     <div class="col">
-    <h3 class="page-title">liste des profiles</h3>
+    <h3 class="page-title">liste des Filieres</h3>
     </div>
     <div class="col-auto text-end float-end ms-auto download-grp">
         <a href="#" id="exportLink" class="btn btn-outline-primary me-2"><i class="fas fa-download"></i> Download</a>
-        <a href="/filiere" class="btn btn-light" id="filter"><i class="fas fa-filter"></i> Filtrer</a>
+       
         <a href="/addFil" class="btn btn-primary"><i class="fas fa-plus"></i></a>
     </div>
     </div> 

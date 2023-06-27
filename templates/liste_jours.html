@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 
 {% load static %}
@@ -34,6 +32,132 @@
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 
 <!-- Fichier JavaScript -->
+<style>
+  .text-center {
+    margin-top: -45px;
+  }
+
+  .text-left {
+    margin-bottom: 20px;
+    position: absolute;
+    top: 125px;
+    left: 10px;
+  }
+
+  .text-right {
+    margin-bottom: 20px;
+    position: absolute;
+    top: 125px;
+    right: 10px;
+  }
+
+  .table-bordered-custom {
+    border: 1px solid #000;
+    border-collapse: collapse;
+    width: auto;
+  }
+
+  .table-bordered-custom th,
+  .table-bordered-custom td {
+    border: 1px solid #000;
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: normal;
+    width: auto;
+    max-width: none;
+    height: auto;
+    table-layout: fixed;
+  }
+
+  .table-bordered-custom thead {
+    border: 2px solid #000;
+  }
+
+  .arabic {
+    font-family: 'Amiri', Arial, sans-serif;
+  }
+
+  .helo {
+    position: absolute;
+    top: 485px;
+    right: 100px;
+  }
+
+  p {
+    font-family: 'Amiri', Arial, sans-serif;
+    text-align: center;
+  }
+
+  .inline-block {
+    display: inline-block;
+    margin-top: 60px;
+    margin-right: 40px;
+    margin-left: 80px;
+  }
+
+  #pf {
+    position: absolute;
+    top: 5px;
+    left: 10px;
+  }
+
+  #pd {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+  }
+
+  @media print {
+    .print-content {
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: white;
+      z-index: 9999;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .print-content img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .helo {
+      position: absolute;
+      top: 200px;
+      right: 100px;
+    }
+
+    .hi {
+      display: inline-block;
+    }
+
+    .print-content table {
+      position: absolute;
+      top: 350px;
+      left: 5px;
+      border-collapse: collapse;
+      width:100vh;  
+    table-layout: auto;
+    
+    }
+
+    .print-content th,
+    .print-content td,
+    .print-content thead {
+      border: 3px solid #000;
+      padding: 4px;
+      text-align: left;
+      word-break: break-all;
+    white-space: normal;
+    }
+
+  }
+</style>
+
 
 
 </head>
@@ -228,49 +352,104 @@
                                 </select>
                             </div>
                         </div>
+                        <div id="matsoir-container" class="col-12 col-sm-4">
+                          <div class="form-group local-forms">
+                              <label for="matsoir">Sélectionnez un moment de la journée :</label>
+                              <select id="matsoir" name="matsoir" class="form-control">
+                                  <option value="" selected disabled hidden>-----</option> <!-- Option "-----" par défaut -->
+                                  {% for matsoir_option in matsoir_options %}
+                                  <option value="{{ matsoir_option }}">{{ matsoir_option }}</option>
+                                  {% endfor %}
+                              </select>
+                          </div>
+                      </div>
+                      <div class="u print-content">
+                                            <div class="card p-3">
+                        <div class="col-sm-12">
+                          <div class="card-body">
+                          
+                              <div id="pf">
+                                <p>Institut Supérieur de Comptabilité et</p>
+                                <p>d'Administration des Entreprises</p>
+                                <p style="color: rgba(0, 0, 0, 0.489);">Direction des Etudes</p>
+                                
+                              </div>
+                              <div id="pd">
+                                <p>المعهد العالي للمحاسبة و إدارة المؤسسات</p></br>
+                                <p style="color: rgba(37, 21, 21, 0.489);">إدارة الدروس</p> <br>
+                              </div>
+                            </div>  
+                         
+                            <div class="text-center">
+                              <img src="{% static 'assets/img/logo-iscae2.png' %}">
+                            
+                   </div>
+                  
+                   <div class="text-right">
+                    <p class="arabic">Annees universitaire: {{ annee_precedente }}-{{ annee_en_cours }} </p>
+                  </div>
+                  <div class="text-left">
+                    <p class="arabic">Semestres {{ parite }}s</p> </br> </br> </br> </br>
+                  </div>
+                  </div>
+                  <div class='hi'>
+                    <p class="arabic inline-block">Semaine :{{ semaine.semaine }}</p>
+                    <p id="jour-selectionne" class="arabic inline-block">Jour :</p>
+                    <p id="mat-selectionne" class="arabic inline-block">Periode :</p>
+                    
+                </div>
+                  
+                        </div> 
+                   
+                <div id="cours-container">
                         
-
-
-                   
-
-
-
-
-
-
-                   
-                    <div id="cours-container"></div>
+                    </div>
+                </div> <br>  <br>
                     <button id="btn-remplir" class="btn btn-outline-primary me-2">Remplir</button>
+                    <button onclick="printPage()" class="btn btn-outline-primary me-2">Exporter</button>
                     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
                     <script>
+                      
                     $(document).ready(function() {
                         $('#btn-remplir').click(function() {
                             var semaineId = "{{ semaine.id }}";
                             var jourId = $('#jours').val();
-                            
+                            var matsoir = $('#matsoir').val();
                             // Redirige vers la page de remplissage avec les paramètres
-                            window.location.href = "/remplir_cours/" + semaineId + "/" + jourId + "/";
+                            window.location.href = "/remplir_cours/" + semaineId + "/" + jourId  +"/" + matsoir +"/" ;
                         });
                     });
-                    
+                 
                   
                       var semaineId = "{{ semaine.id }}";
                         $(document).ready(function() {
-                            $('#jours').change(function() {
-                                var jourId = $(this).val();
-                                
+                            $('#jours,#matsoir').change(function() {
+                                var jourId = $('#jours').val();
+                                var matsoir = $('#matsoir').val();
+                                var jourNom = $('#jours').find('option:selected').text();
+                                var mat = $('#matsoir').find('option:selected').text();
+                                console.log(matsoir);
+                                $('#jour-selectionne').text('Jour :' + jourNom);
+                                $('#mat-selectionne').text('Periode : ' + mat);
                                 $.ajax({
-                                    url: '/api/afficher_cours_jour/' + semaineId + '/' + jourId + '/',
+                                    url: '/api/afficher_cours_jour/' + semaineId + '/' + jourId + '/' + matsoir + '/',
                                     type: 'GET',
                                     success: function(response) {
-                                        $('#cours-container').html(response);
+                                      $('#cours-container').html(response);
+                                      
+                                     
                                     },
                                     error: function(xhr, status, error) {
                                         console.log(error);
                                     }
                                 });
                             });
+                          
                         });
+    
+                        function printPage() {
+                      window.print();
+                          }
                     </script>
             
     
